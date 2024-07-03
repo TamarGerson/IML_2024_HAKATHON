@@ -78,7 +78,8 @@ def delete_outliers(X: pd.DataFrame):
 
 OUTLIERS_KEYS = [
     "clean_half_persons",
-    "clean_time_in_station"
+    "clean_time_in_station",
+    "clean_negative_passengers"
 ]
 
 
@@ -86,6 +87,7 @@ OUTLIERS_KEYS = [
 OUTLIERS_FUNC = {
     "clean_time_in_station" : clean_time_in_station
     ,"clean_half_persons" : clean_half_persons
+    ,"clean_negative_passengers": clean_negative_passengers
 }
 
 
