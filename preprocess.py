@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
 
 #TODO: trip_id -> int (id)
 #TODO: part -> int (id)
@@ -16,15 +16,19 @@ import pandas as pd
 #TODO: door_closing_time - arrival_time ? more passenj.
 #TODO: passengers_continue -> threshold? pas_up?
 
+
+
+
 #TODO PASSENGERS:
 #   -> no floats (clean_half_pepole())
 def clean_half_persons(X: pd.DataFrame):
-    
-    pass
+    for passeng_fitch in PASSENGER_PRE_PRO_COLUMNS:
+        X[passeng_fitch] = pd.to_numeric(X[passeng_fitch], errors='coerce')
+    X.dropna(subset=PASSENGER_PRE_PRO_COLUMNS)
+    return X
 
 
 #TODO station :
-#   -> door_closing_time - arrival_time < 0 ? 
 def clean_time_in_station(X: pd.DataFrame):
     X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
     return X
@@ -65,11 +69,11 @@ OUTLIERS_KEYS = [
 
 OUTLIERS_FUNC = {
     "clean_time_in_station" : clean_time_in_station
-    "clean_half_persons" : 
+    ,"clean_half_persons" : clean_half_persons
 }
 
 
 PREP_FUNC = {
-    "delete_null" : delete_null,
-    "delete_outliers" : delete_outliers
+    "delete_null" : delete_null
+    ,"delete_outliers" : delete_outliers
     }
