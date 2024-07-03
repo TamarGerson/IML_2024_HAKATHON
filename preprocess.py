@@ -16,10 +16,15 @@ import pandas as pd
 #TODO: door_closing_time - arrival_time ? more passenj.
 #TODO: passengers_continue -> threshold? pas_up?
 
+#TODO PASSENGERS:
+#   -> no floats (clean_half_pepole())
+
+
+#TODO station :
+#   -> door_closing_time - arrival_time < 0 ? 
 
 
 #TODO ALL: 
-#   -> clean null
 def delete_null(X: pd.DataFrame, y = None):
     
     df = X.copy()
@@ -39,16 +44,10 @@ def delete_outliers(X: pd.DataFrame):
     for lier in OUTLIERS_KEYS:
         OUTLIERS_FUNC[lier](X)
     return X
-#   -> 
 
 
 
-#TODO PASSENGERS:
-#   -> no floats (clean_half_pepole())
 
-
-#TODO station :
-#   -> door_closing_time - arrival_time < 0 ? 
 
 
 OUTLIERS_KEYS = [
