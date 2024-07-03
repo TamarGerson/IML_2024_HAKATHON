@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+from geopy.distance import geodesic
 
 #TODO: trip_id -> int (id)
 #TODO: part -> int (id)
@@ -54,9 +54,6 @@ def delete_outliers(X: pd.DataFrame):
 
 
 
-
-
-
 OUTLIERS_KEYS = [
     "clean_half_persons",
     "clean_time_in_station"
@@ -73,3 +70,78 @@ PREP_FUNC = {
     "delete_null" : delete_null,
     "delete_outliers" : delete_outliers
     }
+
+#------------------------------------------PART B----------------------------------------#
+
+def calculate_trip_duration(grouped):
+    trip_duration_in_minutes = grouped['arrival_time'].max() - grouped['arrival_time'].min()
+    return trip_duration_in_minutes.dt.total_seconds() / 60
+
+
+def calculate_number_of_stations(grouped):
+    return grouped.size()
+
+
+def extract_station_info(grouped):
+    source_station = grouped.first()['station_name']
+    dest_station = grouped.last()['station_name']
+    return source_station, dest_station
+
+
+def calculate_departure_time(grouped):
+    return grouped['arrival_time'].min()
+
+
+def calculate_total_passengers(grouped):
+    total_passengers = grouped['passengers_up'].sum() + grouped['passengers_continue'].sum()
+    return total_passengers
+
+
+def calculate_avg_passengers_per_station(total_passengers, number_of_stations):
+    return total_passengers / number_of_stations
+
+
+def calculate_distance(grouped):
+    source_lat = grouped.first()['latitude']
+    source_lon = grouped.first()['longitude']
+    dest_lat = grouped.last()['latitude']
+    dest_lon = grouped.last()['longitude']
+    distance = [geodesic((source_lat[i], source_lon[i]), (dest_lat[i], dest_lon[i])).km for i in range(len(source_lat))]
+    return distance
+
+
+def create_trip_summary(data):
+    grouped = data.groupby('trip_id_unique')
+
+    trip_duration_in_minutes = calculate_trip_duration(grouped)
+    number_of_stations = calculate_number_of_stations(grouped)
+    source_station, dest_station = extract_station_info(grouped)
+    departure_time = calculate_departure_time(grouped)
+    total_passengers = calculate_total_passengers(grouped)
+    avg_passengers_per_station = calculate_avg_passengers_per_station(total_passengers, number_of_stations)
+    distance = calculate_distance(grouped)
+
+    trip_summary = pd.DataFrame({
+        'trip_id_unique': trip_duration_in_minutes.index,
+        'trip_duration_in_minutes': trip_duration_in_minutes.values,
+        'number_of_stations': number_of_stations.values,
+        'source': source_station.values,
+        'dest': dest_station.values,
+        'departure_time': departure_time.values,
+        'total_passengers': total_passengers.values,
+        'avg_passengers_per_station': avg_passengers_per_station.values,
+        'distance_km': distance
+    })
+
+    return trip_summary
+
+
+def merge_summary_with_data(data, trip_summary):
+    return pd.merge(data, trip_summary, on='trip_id_unique')
+
+
+def preprocess_trip_data(file_path):
+    data = read_and_preprocess_data(file_path)
+    trip_summary = create_trip_summary(data)
+    merged_data = merge_summary_with_data(data, trip_summary)
+    return merged_data
