@@ -18,10 +18,17 @@ import pandas as pd
 
 #TODO PASSENGERS:
 #   -> no floats (clean_half_pepole())
+def clean_half_persons(X: pd.DataFrame):
+    
+    pass
 
 
 #TODO station :
 #   -> door_closing_time - arrival_time < 0 ? 
+def clean_time_in_station(X: pd.DataFrame):
+    X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
+    return X
+
 
 
 #TODO ALL: 
@@ -57,8 +64,8 @@ OUTLIERS_KEYS = [
 
 
 OUTLIERS_FUNC = {
-    "clean_half_persons"
-    "clean_time_in_station"
+    "clean_time_in_station" : clean_time_in_station
+    "clean_half_persons" : 
 }
 
 
