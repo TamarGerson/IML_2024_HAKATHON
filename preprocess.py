@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 
 
 #TODO: trip_id -> int (id)
@@ -18,9 +20,8 @@
 
 #TODO ALL: 
 #   -> clean null
-def delete_null_and_outliers(X, y = None):
+def delete_null(X: pd.DataFrame, y = None):
     
-    # X = delete_outliers(X) #WHAT ARE THE OUTLIERS?
     df = X.copy()
     df["lable"] = y
     
@@ -33,8 +34,10 @@ def delete_null_and_outliers(X, y = None):
     return X, y
 
 
-def delete_outliers(X):
+def delete_outliers(X: pd.DataFrame):
     #WHAT ARE THE OUTLIERS?
+    for lier in OUTLIERS_KEYS:
+        OUTLIERS_FUNC[lier](X)
     return X
 #   -> 
 
@@ -46,3 +49,21 @@ def delete_outliers(X):
 
 #TODO station :
 #   -> door_closing_time - arrival_time < 0 ? 
+
+
+OUTLIERS_KEYS = [
+    "clean_half_persons",
+    "clean_time_in_station"
+]
+
+
+OUTLIERS_FUNC = {
+    "clean_half_persons"
+    "clean_time_in_station"
+}
+
+
+PREP_FUNC = {
+    "delete_null" : delete_null,
+    "delete_outliers" : delete_outliers
+    }
