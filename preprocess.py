@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 from geopy.distance import geodesic
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
+PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
+                             ,"passengers_continue"]
+
+
 
 #TODO: trip_id -> int (id)
 #TODO: part -> int (id)
@@ -15,29 +19,40 @@ PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
 #TODO: arrival_time -> hh only? peak time only {0,1}
 # DO WE NEED TO ADD time^2
 #TODO: door_closing_time - arrival_time ? more passenj.
+
+
+
+
+
+
+#TODO PASSENGERS---------------------------------------------------------------:
 #TODO: passengers_continue -> threshold? pas_up?
+def clean_negative_passengers(X: pd.DataFrame):
+    for passeng_fitch in PASSENGER_PRE_PRO_COLUMNS:
+        X = X[X[passeng_fitch] >= 0]
+    return X
 
 
 
-
-#TODO PASSENGERS:
 #   -> no floats (clean_half_pepole())
 def clean_half_persons(X: pd.DataFrame):
     for passeng_fitch in PASSENGER_PRE_PRO_COLUMNS:
         X[passeng_fitch] = pd.to_numeric(X[passeng_fitch], errors='coerce')
     X.dropna(subset=PASSENGER_PRE_PRO_COLUMNS)
     return X
+#PASSENGERS---------------------------------------------------------------:
 
 
 
-#TODO station :
+#TODO station---------------------------------------------------------------::
 def clean_time_in_station(X: pd.DataFrame):
     X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
     return X
+#station---------------------------------------------------------------::
 
 
 
-#TODO ALL: 
+#TODO ALL---------------------------------------------------------------:::
 def delete_null(X: pd.DataFrame, y = None):
     
     df = X.copy()
@@ -58,7 +73,7 @@ def delete_outliers(X: pd.DataFrame):
     for lier in OUTLIERS_KEYS:
         OUTLIERS_FUNC[lier](X)
     return X
-
+#ALL---------------------------------------------------------------:::
 
 
 OUTLIERS_KEYS = [
