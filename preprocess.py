@@ -4,7 +4,8 @@ from geopy.distance import geodesic
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
                              ,"passengers_continue"]
-
+import plotly.express as px
+from scipy.stats import pearsonr
 
 
 #TODO: trip_id -> int (id)
@@ -73,7 +74,24 @@ def delete_outliers(X: pd.DataFrame):
     for lier in OUTLIERS_KEYS:
         OUTLIERS_FUNC[lier](X)
     return X
-#ALL---------------------------------------------------------------:::
+#ALL---------------------------------------------------------------::: 
+
+def numeric_cols(X: pd.DataFrame):
+    columns = [["passengers_up"]]
+    for col in columns:
+        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).round().astype(int)
+    return df
+
+
+def plot_correlation(df, column1, column2):
+    # Calculate the correlation coefficient
+    correlation, _ = pearsonr(df[column1].dropna(), df[column2].dropna())
+    
+    # Create the plot with the correlation coefficient in the title
+    title = f'Correlation Plot between {column1} and {column2} (r = {correlation:.2f})'
+    fig = px.scatter(df, x=column1, y=column2, trendline="ols",
+                     title=title, labels={column1: column1, column2: column2})
+    fig.show()
 
 
 OUTLIERS_KEYS = [
