@@ -28,6 +28,7 @@ def clean_half_persons(X: pd.DataFrame):
     return X
 
 
+
 #TODO station :
 def clean_time_in_station(X: pd.DataFrame):
     X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
@@ -50,14 +51,12 @@ def delete_null(X: pd.DataFrame, y = None):
     return X, y
 
 
+
 def delete_outliers(X: pd.DataFrame):
     #WHAT ARE THE OUTLIERS?
     for lier in OUTLIERS_KEYS:
         OUTLIERS_FUNC[lier](X)
     return X
-
-
-
 
 
 
@@ -67,10 +66,12 @@ OUTLIERS_KEYS = [
 ]
 
 
+
 OUTLIERS_FUNC = {
     "clean_time_in_station" : clean_time_in_station
     ,"clean_half_persons" : clean_half_persons
 }
+
 
 
 PREP_FUNC = {
