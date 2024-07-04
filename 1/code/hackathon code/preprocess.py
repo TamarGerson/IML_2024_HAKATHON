@@ -25,27 +25,18 @@ MARK = 1
 # and ensure a more reliable service. 
 
 
+def convert_time_to_float(df: pd.DataFrame):
+    
+    df['hours'] = df['arrival_time'].apply(lambda x: x.hour)
+    df['minutes'] = df['arrival_time'].apply(lambda x: x.minute)
+    df['hours_float'] = df['hours'] + df['minutes'] / 60
+    
+    return df
 
-
-
-
-# TODO: trip_id -> int (id)
-# TODO: part -> int (id)
-# TODO: trip_id_unique_station -> int (id)
-# TODO: trip_id_unique -> int (id)
-# TODO: line_id id -> int (id)
-# IS LINE ID RELEVANT (DEST 9 vs 15 rehavia)
-# TODO: alternative -> number of alternatives?
-# TODO: cluster -> int(id)
-# TODO: station_name -> needed? id and index
-# TODO: arrival_time -> hh only? peak time only {0,1}
-# DO WE NEED TO ADD time^2
-# TODO: door_closing_time - arrival_time ? more passenj.
 
 
 def add_rush_h_col(X: pd.DataFrame) -> pd.DataFrame:
     rush_hours = get_rush_h(X)
-    # print(rush_hours)
 
     if RUSH_OR_SCALE == SCALE:
         mathod = scale_rush_hours 
@@ -331,12 +322,20 @@ PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
 
 
 FET_HENHECER = [
-    # ("arrival_time", "passengers_continue")
-    ("direction", "rush_hour")
-    # ,("direction", "arrival_time")
+    ("hours_float", "passengers_continue")
+    ,("direction", "rush_hour")
+    ,("direction", "hours_float")
     ,("rush_hour", "station_id")
-    # ,("arrival_time", "station_id")
+    ,("hours_float", "station_id")
 ]
+
+
+def get_hen_fet_cor(X: pd.DataFrame):
+    for t in FET_HENHECER:
+        fet_1, fet_2 = t
+        X = mult_cul(X, fet_1, fet_2)
+    return X
+
 
 ADD_FIT_KEY = [
     "add_rush_h_col"
@@ -355,11 +354,6 @@ OUTLIERS_FUNC = {
     , "clean_negative_passengers": clean_negative_passengers
 }
 
-def get_hen_fet_cor(X: pd.DataFrame):
-    for t in FET_HENHECER:
-        fet_1, fet_2 = t
-        X = mult_cul(X, fet_1, fet_2)
-    return X
 
 
 PREP_FUNC = {
@@ -369,6 +363,8 @@ PREP_FUNC = {
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
     # ,"numeric_cols" : numeric_cols
+    
+    ,"convert_time_to_float" : convert_time_to_float #numeric -> hours
     
     ,"add_square_station_index_column":add_square_station_index_column
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
@@ -396,7 +392,7 @@ def preprocess_passengers_data(file_path):
 
 
 #DEBUG:
-def print_col(df):
+def print_cols(df):
     print("###############################")
     print("\n")
     print("\n")
