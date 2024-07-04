@@ -448,6 +448,7 @@ def preprocess_test_data(test_df: pd.DataFrame, train_df: pd.DataFrame) -> pd.Da
     # Add any new columns to the test set
     for col in test_df.columns:
         if col not in train_df.columns:
+            print(f"Column '{col}' is not in the train set")
             train_df[col] = np.nan
 
     # Reorder the columns to match the train set
