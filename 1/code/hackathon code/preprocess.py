@@ -226,7 +226,24 @@ def numeric_cols(X: pd.DataFrame):
 
 
 
+def convert_cluster_to_numeric(data):
+    data['cluster'], _ = pd.factorize(data['cluster'])
+    return data
 
+
+
+def clean_door_open_time(X: pd.DataFrame) -> pd.DataFrame:
+    threshold = 100
+    if 'door_open_time' in X.columns:
+        X = X[X['door_open_time'] <= threshold]
+    return X
+
+
+
+def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
+    if 'passengers_continue' in X.columns and 'passengers_continue_menupach' in X.columns:
+        X['mult_passengers_menupach'] = X['passengers_continue'] * X['passengers_continue_menupach']
+    return X
 
 
 
@@ -300,27 +317,6 @@ def merge_summary_with_data(data, trip_summary):
     return pd.merge(data, trip_summary, on='trip_id_unique')
 
 
-# def preprocess_trip_data(file_path):
-#     data = read_and_preprocess_data(file_path)
-#     trip_summary = create_trip_summary(data)
-#     merged_data = merge_summary_with_data(data, trip_summary)
-#     return merged_data
-
-def convert_cluster_to_numeric(data):
-    data['cluster'], _ = pd.factorize(data['cluster'])
-    return data
-
-def clean_door_open_time(X: pd.DataFrame) -> pd.DataFrame:
-    threshold = 100
-    if 'door_open_time' in X.columns:
-        X = X[X['door_open_time'] <= threshold]
-    return X
-
-def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
-    if 'passengers_continue' in X.columns and 'passengers_continue_menupach' in X.columns:
-        X['mult_passengers_menupach'] = X['passengers_continue'] * X['passengers_continue_menupach']
-    return X
-
 
 def get_hen_fet_cor(X: pd.DataFrame):
     for t in FET_HENHECER:
@@ -328,8 +324,10 @@ def get_hen_fet_cor(X: pd.DataFrame):
         X = mult_cul(X, fet_1, fet_2)
     return X
 
+# ------------------------------------------PART B----------------------------------------#
 
 ################################ - PART A - ################################
+
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
                             ,"passengers_continue"]
 
@@ -343,16 +341,20 @@ FET_HENHECER = [
     ,("rush_hour", "rush_hour")
 ]
 
+
 ADD_FIT_KEY = [
     "add_rush_h_col"
     ,"add_last_station_column"
 ]
 
+
 OUTLIERS_KEYS = [
-    "clean_half_persons"
     # ,"clean_time_in_station"
+    "clean_half_persons"
     , "clean_negative_passengers"
+    ,"clean_door_open_time"
 ]
+
 
 OUTLIERS_FUNC = {
     "clean_time_in_station": clean_time_in_station
@@ -362,15 +364,14 @@ OUTLIERS_FUNC = {
 }
 
 
-
 PREP_FUNC = {
     "add_rush_h_col": add_rush_h_col #replace with add method for all
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
     ,"add_square_station_index_column":add_square_station_index_column
     ,"add_people_multiplication" : add_people_multiplication
-    # ,"numeric_cols" : numeric_cols
-
+    ,"numeric_cols" : numeric_cols
+    
     ,"convert_time_to_float" : convert_time_to_float
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
 
@@ -393,6 +394,7 @@ COLUMNS_TO_DELETE = {
 
 
 # :#############################################################
+
 def preprocess_data(X: pd.DataFrame):
     
     X = delete_null(X)
@@ -411,6 +413,7 @@ def preprocess_passengers_data(file_path):
     data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
     data = delete_columns(data)
     return data
+
 
 def delete_columns(X: pd.DataFrame) -> pd.DataFrame:
     columns_dict = COLUMNS_TO_DELETE
