@@ -19,7 +19,7 @@ if __name__ == "__main__":
     else:
         # file_path = sys.argv[1]
         file_path = '/Users/ofirhol/Documents/year2/ב/iml/hackathon/IML_2024_HAKATHON/train_data.csv'
-        train_data = preprocess_passengers_data(file_path)
+        train_data = preprocess_duration_train(file_path)
         print(train_data.columns)
 
     # plot_avg_passengers_per_interval_by_area(train_data, TARGET_COLUMN)
