@@ -57,18 +57,10 @@ def clean_time_in_station(X: pd.DataFrame):
 
 
 #TODO ALL---------------------------------------------------------------:::
-def delete_null(X: pd.DataFrame, y = None):
-    
+def delete_null(X: pd.DataFrame):
     df = X.copy()
-    df["lable"] = y
-    
-    df = df.dropna() #.drop_duplicates() 
-    df = df[df["lable"] < 0] # no negative number of pass
-    
-    y = df["lable"]
-    X = df.drop(columns = ["lable"])
-    
-    return X, y
+    X = df.dropna() #.drop_duplicates() 
+    return X
 
 
 
