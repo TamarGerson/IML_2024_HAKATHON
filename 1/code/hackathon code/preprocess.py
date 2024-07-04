@@ -417,20 +417,4 @@ if __name__ == '__main__':
     #mult continue with people menupach
 
 
-
-    #todo delete
-    #cluster
-    #direction
-    #hour
-    #direction rush hour
-    #lat
-    #long
-    #line_id
-    #station_id
-    #rush_hour
-    #remove is last stop
-    #station_index_squared
-    #trip_id
-    #passergers_up
-
     pass
