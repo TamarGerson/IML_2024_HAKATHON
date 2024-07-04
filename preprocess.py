@@ -72,6 +72,25 @@ def clean_time_in_station(X: pd.DataFrame) -> pd.DataFrame:
     X = X[(X['door_closing_time'] - X['arrival_time']) >= pd.Timedelta(0)]
     
     return X
+# time------------------------------------------------------------------::
+
+def convert_to_datetime(df, columns = ['arrival_time', 'door_closing_time']):
+    for col in columns:
+        df[col] = pd.to_datetime(df[col], format='%H:%M:%S', errors='coerce')
+    return df
+
+def calculate_time_diff(df, start_column, end_column, diff_column_name = "diff time"):
+    df = convert_to_datetime(df, [start_column, end_column])
+    df[start_column] = pd.to_datetime(df[start_column], errors='coerce')
+    df[end_column] = pd.to_datetime(df[end_column], errors='coerce')
+    df[end_column] = df[end_column].fillna(df[start_column])
+
+    mask = df[end_column] < df[start_column]
+    df.loc[mask, [start_column, end_column]] = df.loc[mask, [end_column, start_column]].values
+
+    df[diff_column_name] = (df[end_column] - df[start_column]).dt.total_seconds() / 60
+    df[diff_column_name].fillna(0, inplace=True)
+    return df
 
 
 # station---------------------------------------------------------------::
@@ -166,6 +185,7 @@ def preprocess_passengers_data(file_path):
     data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
     data = assign_areas(data, 'latitude', 'longitude')
     data = convert_cluster_to_numeric(data)
+    data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
     data = add_area_grade_column(data)
     return data
 
