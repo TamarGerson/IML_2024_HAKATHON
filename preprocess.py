@@ -4,50 +4,43 @@ from geopy.distance import geodesic
 import plotly.express as px
 from scipy.stats import pearsonr
 
-
 # passengers_continue_menupach
 # The Passenger Continuity Inflation Factor (PCIF) 
 # in transportation refers to the additional time built 
 # into a schedule to account for the process of passengers boarding,
 # alighting, and transferring between services.
 
-#mekadem_nipuach_luz
+# mekadem_nipuach_luz
 # The timetable inflation factor (TIF)
 # in transportation refers to the practice of adding extra time
 # to a transportation schedule to account for potential delays
 # and ensure a more reliable service. 
 
 
-PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
-                             ,"passengers_continue"]
+PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
+    , "passengers_continue"]
 
 
-
-#TODO: trip_id -> int (id)
-#TODO: part -> int (id)
-#TODO: trip_id_unique_station -> int (id)
-#TODO: trip_id_unique -> int (id)
-#TODO: line_id id -> int (id)
+# TODO: trip_id -> int (id)
+# TODO: part -> int (id)
+# TODO: trip_id_unique_station -> int (id)
+# TODO: trip_id_unique -> int (id)
+# TODO: line_id id -> int (id)
 # IS LINE ID RELEVANT (DEST 9 vs 15 rehavia)
-#TODO: alternative -> number of alternatives?
-#TODO: cluster -> int(id)
-#TODO: station_name -> needed? id and index
-#TODO: arrival_time -> hh only? peak time only {0,1}
+# TODO: alternative -> number of alternatives?
+# TODO: cluster -> int(id)
+# TODO: station_name -> needed? id and index
+# TODO: arrival_time -> hh only? peak time only {0,1}
 # DO WE NEED TO ADD time^2
-#TODO: door_closing_time - arrival_time ? more passenj.
+# TODO: door_closing_time - arrival_time ? more passenj.
 
 
-
-
-
-
-#TODO PASSENGERS---------------------------------------------------------------:
-#TODO: passengers_continue -> threshold? pas_up?
+# TODO PASSENGERS---------------------------------------------------------------:
+# TODO: passengers_continue -> threshold? pas_up?
 def clean_negative_passengers(X: pd.DataFrame):
     for passeng_fitch in PASSENGER_PRE_PRO_COLUMNS:
         X = X[X[passeng_fitch] >= 0]
     return X
-
 
 
 #   -> no floats (clean_half_pepole())
@@ -56,39 +49,46 @@ def clean_half_persons(X: pd.DataFrame):
         X[passeng_fitch] = pd.to_numeric(X[passeng_fitch], errors='coerce')
     X.dropna(subset=PASSENGER_PRE_PRO_COLUMNS)
     return X
-#PASSENGERS---------------------------------------------------------------:
 
 
+# PASSENGERS---------------------------------------------------------------:
 
-#TODO station---------------------------------------------------------------::
+
+# TODO station---------------------------------------------------------------::
 def clean_time_in_station(X: pd.DataFrame):
-    
     if 'door_closing_time' not in X.columns or 'arrival_time' not in X.columns:
         raise ValueError("clean_time_in_station - missimg column")
-    
+
     X['door_closing_time'] = pd.to_datetime(X['door_closing_time'])
     X['arrival_time'] = pd.to_datetime(X['arrival_time'])
-    
+
     X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
     return X
-#station---------------------------------------------------------------::
 
 
+# station---------------------------------------------------------------::
 
-#TODO ALL---------------------------------------------------------------:::
+def add_last_station_column(data):
+    # Determine the last station for each trip_id_unique
+    data['last_station'] = data.groupby('trip_id_unique')['station_index'].transform(max) == data['station_index']
+    data['last_station'] = data['last_station'].astype(int)  # Convert boolean to binary (0/1)
+    return data
+
+# TODO ALL---------------------------------------------------------------:::
 def delete_null(X: pd.DataFrame):
     df = X.copy()
-    X = df.dropna() #.drop_duplicates() 
+    X = df.dropna()  # .drop_duplicates()
     return X
-
 
 
 def delete_outliers(X: pd.DataFrame):
-    #WHAT ARE THE OUTLIERS?
+    # WHAT ARE THE OUTLIERS?
     for lier in OUTLIERS_KEYS:
         OUTLIERS_FUNC[lier](X)
     return X
-#ALL---------------------------------------------------------------::: 
+
+
+# ALL---------------------------------------------------------------:::
 
 def numeric_cols(X: pd.DataFrame):
     columns = [["passengers_up"]]
@@ -100,37 +100,35 @@ def numeric_cols(X: pd.DataFrame):
 OUTLIERS_KEYS = [
     "clean_half_persons"
     # ,"clean_time_in_station"
-    ,"clean_negative_passengers"
+    , "clean_negative_passengers"
 ]
 
-
-
 OUTLIERS_FUNC = {
-    "clean_time_in_station" : clean_time_in_station
-    ,"clean_half_persons" : clean_half_persons
-    ,"clean_negative_passengers": clean_negative_passengers
+    "clean_time_in_station": clean_time_in_station
+    , "clean_half_persons": clean_half_persons
+    , "clean_negative_passengers": clean_negative_passengers
 }
 
-
-
 PREP_FUNC = {
-    "delete_null" : delete_null
-    ,"delete_outliers" : delete_outliers
-    }
+    "delete_null": delete_null
+    , "delete_outliers": delete_outliers
+}
 
 
 def preprocess_passengers_data(file_path):
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
     data = delete_null(data)
     data = delete_outliers(data)
+    data = add_last_station_column(data)
     return data
-
 
 
 # TODO:
 def read_and_preprocess_data(file_path):
     pass
-#------------------------------------------PART B----------------------------------------#
+
+
+# ------------------------------------------PART B----------------------------------------#
 
 def calculate_trip_duration(grouped):
     trip_duration_in_minutes = grouped['arrival_time'].max() - grouped['arrival_time'].min()
