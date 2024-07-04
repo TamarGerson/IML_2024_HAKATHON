@@ -24,7 +24,13 @@ MARK = 1
 # to a transportation schedule to account for potential delays
 # and ensure a more reliable service. 
 
-
+def convert_time_to_float(df: pd.DataFrame):
+    
+    df['hours'] = df['arrival_time'].apply(lambda x: x.hour)
+    df['minutes'] = df['arrival_time'].apply(lambda x: x.minute)
+    df['hours_float'] = df['hours'] + df['minutes'] / 60
+    
+    return df
 
 
 
@@ -331,11 +337,11 @@ PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
 
 
 FET_HENHECER = [
-    # ("arrival_time", "passengers_continue")
-    ("direction", "rush_hour")
-    # ,("direction", "arrival_time")
+    ("hours_float", "passengers_continue")
+    ,("direction", "rush_hour")
+    ,("direction", "hours_float")
     ,("rush_hour", "station_id")
-    # ,("arrival_time", "station_id")
+    ,("hours_float", "station_id")
 ]
 
 ADD_FIT_KEY = [
@@ -370,6 +376,7 @@ PREP_FUNC = {
     ,"add_area_grade_column" : add_area_grade_column
     # ,"numeric_cols" : numeric_cols
     
+    ,"convert_time_to_float" : convert_time_to_float
     ,"add_square_station_index_column":add_square_station_index_column
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
     
