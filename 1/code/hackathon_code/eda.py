@@ -146,7 +146,6 @@ def determine_rush_hours(csv_file, time_column, passenger_column, plot=True, enc
     return rush_hours
 
 
-
 if __name__ == '__main__':
     csv_file = 'train_data.csv'  # Replace with your CSV file path
     time_column = 'arrival_time'  # Replace with your time column name
