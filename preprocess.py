@@ -94,6 +94,11 @@ def add_30_minute_interval(df, time_column, interval_column_name):
 
     return df
 
+def assign_areas(df, lat_column, lon_column):
+    # Define your own logic for areas, here we use a simple grid approach
+    df['area'] = df.apply(lambda row: f"Area_{int(row[lat_column])}_{int(row[lon_column])}", axis=1)
+    return df
+
 # TODO ALL---------------------------------------------------------------:::
 def delete_null(X: pd.DataFrame):
     df = X.copy()
@@ -141,6 +146,7 @@ def preprocess_passengers_data(file_path):
     data = delete_outliers(data)
     data = add_square_station_index_column(data)
     data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
+    data = assign_areas(data, 'latitude', 'longitude')
     return data
 
 
