@@ -10,7 +10,8 @@ datetime_format = "%H:%M:%S"
 RUSH_OR_SCALE = 1
 SCALE = 0
 MARK = 1
-RUSH_H_HYPER = 2
+RUSH_H_HYPER = 1
+NUM_OF_RUSH_H = 6
 
 
 # passengers_continue_menupach
@@ -87,7 +88,7 @@ def get_rush_h(X: pd.DataFrame):
     X['hour'] = X['arrival_time'].dt.hour
     hourly_passenger_counts = X.groupby('hour')["passengers_up"].sum()
 
-    rush_hours = hourly_passenger_counts.nlargest(6).index.tolist()
+    rush_hours = hourly_passenger_counts.nlargest(NUM_OF_RUSH_H).index.tolist()
     return rush_hours
 
 
