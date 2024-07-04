@@ -48,10 +48,12 @@ def train_passengers_forest_model(X_train, y_train):
     best_rf = grid_search.best_estimator_
     return best_rf
 
+
 def train_passengers_linear_model(X_train, y_train):
     lr = LinearRegression()
     lr.fit(X_train, y_train)
     return lr
+
 
 if __name__ == "__main__":
     if len(sys.argv) != NUM_OF_ARGUMENTS:
@@ -60,7 +62,7 @@ if __name__ == "__main__":
         file_path = sys.argv[1]
         train_data = preprocess_passengers_data(file_path)
         plot_avg_passengers_per_interval_by_area(train_data, TARGET_COLUMN)
-        plot_all_correlations(train_data, TARGET_COLUMN, "second_try")
+        #plot_all_correlations(train_data, TARGET_COLUMN, "second_try")
 
 
         # perform_linear_regression(train_data, test_data, target_column)
