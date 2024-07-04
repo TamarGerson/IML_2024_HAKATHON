@@ -369,7 +369,7 @@ PREP_FUNC = {
     ,"add_area_grade_column" : add_area_grade_column
     ,"add_square_station_index_column":add_square_station_index_column
     ,"add_people_multiplication" : add_people_multiplication
-    ,"numeric_cols" : numeric_cols
+    # ,"numeric_cols" : numeric_cols
     
     ,"convert_time_to_float" : convert_time_to_float
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
@@ -377,18 +377,19 @@ PREP_FUNC = {
     ,"get_hen_fet_cor" : get_hen_fet_cor
 }
 
-COLUMNS_TO_DELETE = {
-    'cluster': 'cluster',
-    'direction': 'direction',
-    'lat': 'latitude',
-    'long': 'longitude',
-    'line_id': 'line_id',
-    'station_id': 'station_id',
-    'rush_hour': 'rush_hour',
-    'trip_id': 'trip_id_unique',
-    'trip_id_unique_station': 'trip_id_unique_station',
-    'passengers_up': 'passengers_up',
-}
+# COLUMNS_TO_DELETE = {
+#     'cluster': 'cluster',
+#     'direction': 'direction',
+#     'lat': 'latitude',
+#     'long': 'longitude',
+#     'line_id': 'line_id',
+#     'station_id': 'station_id',
+#     'rush_hour': 'rush_hour',
+#     'trip_id': 'trip_id_unique',
+#     'trip_id_unique_station': 'trip_id_unique_station'
+# }
+
+COLUMNS_TO_DELETE = {}
 
 
 

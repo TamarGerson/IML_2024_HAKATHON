@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 import logging
 import pandas as pd
-from hackathon_code.evaluate_passengers.py import *
-from hackathon_code.preprocess.py import *
+from hackathon_code.preprocess import preprocess_passengers_train, preprocess_passengers_test
+from hackathon_code.evaluate_passengers import *
 """
 usage:
     python code/main.py --training_set PATH --test_set PATH --out PATH
@@ -11,7 +11,24 @@ for example:
     python code/main.py --training_set /cs/usr/gililior/training.csv --test_set /cs/usr/gililior/test.csv --out predictions/trip_duration_predictions.csv 
 
 """
+def train_passengers_forest_model(X_train, y_train):
+    rf = RandomForestRegressor(random_state=42)
+    param_grid = {
+        'n_estimators': [100, 200],
+        'max_depth': [10, 20, None],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+    }
+    grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1, verbose=2)
+    grid_search.fit(X_train, y_train)
+    best_rf = grid_search.best_estimator_
+    return best_rf
 
+
+def train_passengers_linear_model(X_train, y_train):
+    lr = LinearRegression()
+    lr.fit(X_train, y_train)
+    return lr
 
 def preprocess_passengers_train(training_data):
     training_data = preprocess_passengers_data(training_data)
