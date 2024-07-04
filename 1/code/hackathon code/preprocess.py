@@ -7,7 +7,7 @@ from scipy.stats import pearsonr
 from datetime import datetime
 
 datetime_format = "%H:%M:%S"
-RUSH_OR_SCALE = 0
+RUSH_OR_SCALE = 1
 SCALE = 0
 MARK = 1
 
