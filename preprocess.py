@@ -80,7 +80,7 @@ def numeric_cols(X: pd.DataFrame):
 
 OUTLIERS_KEYS = [
     "clean_half_persons"
-    ,"clean_time_in_station"
+    # ,"clean_time_in_station"
     ,"clean_negative_passengers"
 ]
 
@@ -104,9 +104,6 @@ def preprocess_passengers_data(file_path):
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
     data = delete_null(data)
     data = delete_outliers(data)
-    data = clean_negative_passengers(data)
-    data = clean_half_persons(data)
-    data = numeric_cols(data)
     return data
 
 
