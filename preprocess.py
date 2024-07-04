@@ -74,6 +74,19 @@ def add_last_station_column(data):
     data['last_station'] = data['last_station'].astype(int)  # Convert boolean to binary (0/1)
     return data
 
+def add_square_station_index_column(data):
+    # Create a column for the square of station_index
+    data['station_index_squared'] = data['station_index'] ** 2
+    return data
+
+def add_30_minute_interval(df, time_column, interval_column_name):
+    # Convert column to datetime
+    df[time_column] = pd.to_datetime(df[time_column], errors='coerce')
+    # Create a new column with 10-minute intervals
+    df[interval_column_name] = df[time_column].dt.floor('30T')
+
+    return df
+
 # TODO ALL---------------------------------------------------------------:::
 def delete_null(X: pd.DataFrame):
     df = X.copy()
@@ -119,7 +132,8 @@ def preprocess_passengers_data(file_path):
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
     data = delete_null(data)
     data = delete_outliers(data)
-    data = add_last_station_column(data)
+    data = add_square_station_index_column(data)
+    data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
     return data
 
 
