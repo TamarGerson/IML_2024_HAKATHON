@@ -7,6 +7,10 @@ from scipy.stats import pearsonr
 from datetime import datetime
 
 datetime_format = "%H:%M:%S"
+RUSH_OR_SCALE = 0
+SCALE = 0
+MARK = 1
+
 
 # passengers_continue_menupach
 # The Passenger Continuity Inflation Factor (PCIF) 
@@ -40,9 +44,21 @@ datetime_format = "%H:%M:%S"
 
 
 def add_rush_h_col(X: pd.DataFrame) -> pd.DataFrame:
-    
     rush_hours = get_rush_h(X)
-    print(rush_hours)
+    # print(rush_hours)
+
+    if RUSH_OR_SCALE == SCALE:
+        mathod = scale_rush_hours 
+    else:
+        mathod = add_rush_mark
+    X = mathod(X, rush_hours)
+
+    return X
+
+
+
+def add_rush_mark(X: pd.DataFrame, rush_hours: list):
+    
     def is_rush_hour(hour):
         return 1 if hour in rush_hours else 0
     
@@ -50,6 +66,36 @@ def add_rush_h_col(X: pd.DataFrame) -> pd.DataFrame:
     X['rush_hour'] = X['hour'].apply(is_rush_hour)
     return X
 
+
+
+
+def scale_rush_hours(df: pd.DataFrame, rush_hours: list) -> pd.DataFrame:
+    
+    passenger_counts = dict(zip(df['hour'], df['passengers_up']))
+
+    # Find maximum and minimum passenger counts to normalize grades
+    max_passengers = max(passenger_counts.values())
+    min_passengers = min(passenger_counts.values())
+
+    # Scaling factor
+    scale_factor = 9 / (max_passengers - min_passengers) if max_passengers != min_passengers else 1
+
+    # Initialize list for scaled rush hour grades
+    scaled_rush_hours = []
+
+    # Assign grades based on passenger counts
+    for hour in df['hour']:
+        if hour in passenger_counts:
+            passengers = passenger_counts[hour]
+            # Scale passenger count to a grade between 1 and 10
+            grade = 1 + scale_factor * (passengers - min_passengers)
+            scaled_rush_hours.append(round(grade))
+        else:
+            scaled_rush_hours.append(0)  # Handle missing hour data
+
+    
+    df['rush_hour_grade'] = scaled_rush_hours
+    return df  # Return None if inplace=True (to match pandas convention)
 
 
 def get_rush_h(X: pd.DataFrame):
