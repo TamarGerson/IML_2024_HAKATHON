@@ -79,8 +79,8 @@ def delete_outliers(X: pd.DataFrame):
 def numeric_cols(X: pd.DataFrame):
     columns = [["passengers_up"]]
     for col in columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).round().astype(int)
-    return df
+        X[col] = pd.to_numeric(X[col], errors='coerce').fillna(0).round().astype(int)
+    return X
 
 
 OUTLIERS_KEYS = [
@@ -103,6 +103,16 @@ PREP_FUNC = {
     "delete_null" : delete_null
     ,"delete_outliers" : delete_outliers
     }
+
+
+def preprocess_passengers_data(file_path):
+    data = pd.read_csv(file_path, encoding="ISO-8859-8")
+    data = delete_null(data)
+    data = delete_outliers(data)
+    data = clean_negative_passengers(data)
+    data = clean_half_persons(data)
+    data = numeric_cols(data)
+    return data
 
 
 
