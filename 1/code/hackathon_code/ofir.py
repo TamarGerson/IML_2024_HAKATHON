@@ -102,7 +102,7 @@ def train_decision_tree_model(df):
     return clf
 
 # Specify the path to your CSV file
-csv_file_path = '/Users/ofirhol/Documents/year2/ב/iml/hackathon/IML_2024_HAKATHON/train_data.csv'
+csv_file_path = '/Users/ofirhol/Documents/year2/ב/iml/hackathon/IML_2024_HAKATHON/train_bus_schedule.csv'
 
 # Load and preprocess the data
 df = load_and_preprocess_data(csv_file_path)
