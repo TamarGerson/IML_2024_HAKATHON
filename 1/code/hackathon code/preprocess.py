@@ -15,7 +15,6 @@ RUSH_H_HYPER = 1
 NUM_OF_RUSH_H = 6
 
 
-
 # passengers_continue_menupach
 # The Passenger Continuity Inflation Factor (PCIF) 
 # in transportation refers to the additional time built 
