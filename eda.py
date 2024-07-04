@@ -87,8 +87,6 @@ def plot_all_correlations(df, target_column, save_folder):
 
 #     return rush_hours
 
-import matplotlib.pyplot as plt
-
 def determine_rush_hours(csv_file, time_column, passenger_column, plot=True, encoding='utf-8', datetime_format=None):
     """
     Determine rush hours based on the sum of passengers in the transportation data.
