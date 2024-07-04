@@ -329,17 +329,6 @@ def convert_cluster_to_numeric(data):
     data['cluster'], _ = pd.factorize(data['cluster'])
     return data
 
-def clean_door_open_time(X: pd.DataFrame) -> pd.DataFrame:
-    threshold = 100
-    if 'door_open_time' in X.columns:
-        X = X[X['door_open_time'] <= threshold]
-    return X
-
-def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
-    if 'passengers_continue' in X.columns and 'passengers_continue_menupach' in X.columns:
-        X['mult_passengers_menupach'] = X['passengers_continue'] * X['passengers_continue_menupach']
-    return X
-
 
 # -------------------------------------------------------------------------------
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
@@ -386,12 +375,24 @@ PREP_FUNC = {
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
     # ,"numeric_cols" : numeric_cols
-    ,"clean_door_open_time" : clean_door_open_time
-    ,"convert_time_to_float" : convert_time_to_float
-    ,"add_square_station_index_column":add_square_station_index_column
+
+    #,"add_square_station_index_column":add_square_station_index_column
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
-    ,"add_people_multiplication" : add_people_multiplication
+   # ,"add_people_multiplication" : add_people_multiplication
     ,"get_hen_fet_cor" : get_hen_fet_cor
+}
+
+COLUMNS_TO_DELETE = {
+    'cluster': 'cluster',
+    'direction': 'direction',
+    'lat': 'latitude',
+    'long': 'longitude',
+    'line_id': 'line_id',
+    'station_id': 'station_id',
+    'rush_hour': 'rush_hour',
+    'trip_id': 'trip_id_unique',
+    'trip_id_unique_station': 'trip_id_unique_station',
+    'passengers_up': 'passengers_up',
 }
 
 # :#############################################################
@@ -408,7 +409,15 @@ def preprocess_passengers_data(file_path):
     data = add_30_minute_interval(data, 'arrival_time', '30_min_interval')
     data = assign_areas(data, 'latitude', 'longitude')
     data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
+    data = delete_columns(data)
     return data
+
+def delete_columns(X: pd.DataFrame) -> pd.DataFrame:
+    columns_dict = COLUMNS_TO_DELETE
+    for col in columns_dict.keys():
+        if col in X.columns:
+            X = X.drop(columns=[col])
+    return X
 # :#############################################################
 
 
