@@ -336,8 +336,8 @@ def clean_door_open_time(X: pd.DataFrame) -> pd.DataFrame:
     return X
 
 def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
-    if 'passengers_up' in X.columns and 'passengers_continue_menupach' in X.columns:
-        X['mult_passengers_menupach'] = X['passengers_up'] * X['passengers_continue_menupach']
+    if 'passengers_continue' in X.columns and 'passengers_continue_menupach' in X.columns:
+        X['mult_passengers_menupach'] = X['passengers_continue'] * X['passengers_continue_menupach']
     return X
 
 
