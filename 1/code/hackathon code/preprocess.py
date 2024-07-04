@@ -308,6 +308,17 @@ def convert_cluster_to_numeric(data):
     data['cluster'], _ = pd.factorize(data['cluster'])
     return data
 
+def clean_door_open_time(X: pd.DataFrame) -> pd.DataFrame:
+    threshold = 100
+    if 'door_open_time' in X.columns:
+        X = X[X['door_open_time'] <= threshold]
+    return X
+
+def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
+    if 'passengers_continue' in X.columns and 'passengers_continue_menupach' in X.columns:
+        X['mult_passengers_menupach'] = X['passengers_continue'] * X['passengers_continue_menupach']
+    return X
+
 
 ################################ - PART A - ################################
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
@@ -355,10 +366,11 @@ PREP_FUNC = {
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
     # ,"numeric_cols" : numeric_cols
-
-    #,"add_square_station_index_column":add_square_station_index_column
+    ,"clean_door_open_time" : clean_door_open_time
+    ,"convert_time_to_float" : convert_time_to_float
+    ,"add_square_station_index_column":add_square_station_index_column
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
-   # ,"add_people_multiplication" : add_people_multiplication
+    ,"add_people_multiplication" : add_people_multiplication
     ,"get_hen_fet_cor" : get_hen_fet_cor
 }
 
