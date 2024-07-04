@@ -109,6 +109,9 @@ PREP_FUNC = {
 
 
 
+# TODO:
+def read_and_preprocess_data(file_path):
+    pass
 #------------------------------------------PART B----------------------------------------#
 
 def calculate_trip_duration(grouped):
