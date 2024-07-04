@@ -398,6 +398,48 @@ def delete_columns(X: pd.DataFrame) -> pd.DataFrame:
         if col in X.columns:
             X = X.drop(columns=[col])
     return X
+
+
+def preprocess_test_data(test_df: pd.DataFrame, train_df: pd.DataFrame) -> pd.DataFrame:
+    # List of preprocessing functions to be applied
+    preprocessing_functions = [
+        add_rush_h_col,
+        add_last_station_column,
+        add_area_grade_column,
+        convert_cluster_to_numeric,
+        get_hen_fet_cor,
+        lambda df: add_30_minute_interval(df, 'arrival_time', '30_min_interval'),
+        lambda df: assign_areas(df, 'latitude', 'longitude'),
+        lambda df: calculate_time_diff(df, 'arrival_time', 'door_closing_time'),
+        delete_columns
+    ]
+
+    # Apply preprocessing functions
+    for func in preprocessing_functions:
+        test_df = func(test_df)
+
+    # Ensure all columns in the train set are in the test set
+    for col in train_df.columns:
+        if col not in test_df.columns:
+            test_df[col] = np.nan
+
+    # Add any new columns to the test set
+    for col in test_df.columns:
+        if col not in train_df.columns:
+            train_df[col] = np.nan
+
+    # Reorder the columns to match the train set
+    test_df = test_df[train_df.columns]
+
+    # Fill missing values with the median (or floor of the median for range of values)
+    for col in test_df.columns:
+        if test_df[col].isnull().any():
+            median_value = train_df[col].median()
+            if pd.api.types.is_numeric_dtype(train_df[col]):
+                median_value = np.floor(median_value) if isinstance(median_value, float) else median_value
+            test_df[col].fillna(median_value, inplace=True)
+
+    return test_df
 # :#############################################################
 ################################ - PART A - ################################
 
