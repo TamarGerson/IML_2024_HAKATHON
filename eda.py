@@ -26,16 +26,26 @@ def plot_correlation(df, column1, column2):
 
 
 def plot_avg_passengers_per_interval_by_area(df, passengers_column):
-    # Calculate the average passengers up per 10-minute interval for each area
-    avg_passengers = df.groupby(['area', '10_min_interval'])[passengers_column].mean().reset_index()
+    # Create 10-minute intervals
+    df['10_min_interval'] = df['arrival_time'].dt.floor('10T')
 
-    # Create the bar chart
-    fig = px.bar(avg_passengers, x='10_min_interval', y=passengers_column, facet_col='area',
-                 title='Average Passengers Up per 10-Minute Interval by Area',
-                 labels={'10_min_interval': 'Time Interval', passengers_column: 'Average Passengers Up'})
+    # Calculate the average passengers up per 10-minute interval for each cluster
+    avg_passengers = df.groupby(['cluster', '10_min_interval'])[passengers_column].mean().reset_index()
 
-    fig.update_layout(showlegend=False)
-    fig.show()
+    # Plot for each cluster
+    clusters = avg_passengers['cluster'].unique()
+    for cluster in clusters:
+        cluster_data = avg_passengers[avg_passengers['cluster'] == cluster]
+        plt.figure(figsize=(10, 6))
+        plt.bar(cluster_data['10_min_interval'].astype(str), cluster_data[passengers_column])
+        plt.xlabel('Time Interval')
+        plt.ylabel('Average Passengers Up')
+        plt.title(f'Average Passengers Up per 10-Minute Interval - Cluster {cluster}')
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.savefig(f'avg_passengers_up_cluster_{cluster}.png')
+        plt.close()
+        print(f"Graph for cluster {cluster} saved as avg_passengers_up_cluster_{cluster}.png")
 
 
 def plot_all_correlations(df, target_column, save_folder):

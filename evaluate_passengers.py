@@ -33,16 +33,17 @@ def perform_linear_regression(train_data, test_data, target_column):
     print(f"Mean Squared Error on the test data: {mse}")
 
 
+def evaluate_preprocess(file_path):
+    pass
+
 if __name__ == "__main__":
     if len(sys.argv) != NUM_OF_ARGUMENTS:
         print("Usage: python evaluate_passengers.py <file_path>")
     else:
         file_path = sys.argv[1]
         train_data = preprocess_passengers_data(file_path)
-        target_column = TARGET_COLUMN
-        plot_avg_passengers_per_interval_by_area(train_data, target_column)
-        # rush_hours = determine_rush_hours(train_data, TIME_COLUMN)
-        plot_all_correlations(train_data, target_column, "first_try")
+        plot_avg_passengers_per_interval_by_area(train_data, TARGET_COLUMN)
+        plot_all_correlations(train_data, TARGET_COLUMN, "first_try")
 
-        # Perform linear regression and evaluate the loss
+
         # perform_linear_regression(train_data, test_data, target_column)

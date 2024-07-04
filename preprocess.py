@@ -100,6 +100,20 @@ def assign_areas(df, lat_column, lon_column):
     df['area'] = df.apply(lambda row: f"Area_{int(row[lat_column])}_{int(row[lon_column])}", axis=1)
     return df
 
+
+def add_area_grade_column(data):
+    # Calculate the average number of passengers up for each area (cluster)
+    avg_passengers_per_area = data.groupby('cluster')['passengers_up'].mean().reset_index()
+    avg_passengers_per_area.rename(columns={'passengers_up': 'avg_passengers_up'}, inplace=True)
+
+    # Assign numeric grades based on quantiles
+    avg_passengers_per_area['area_grade'] = pd.qcut(avg_passengers_per_area['avg_passengers_up'],
+                                                    q=3, labels=[1, 2, 3])  # 1: low, 2: medium, 3: high
+
+    # Merge the area grade back to the main data
+    data = data.merge(avg_passengers_per_area[['cluster', 'area_grade']], on='cluster', how='left')
+    return data
+
 # TODO ALL---------------------------------------------------------------:::
 def delete_null(X: pd.DataFrame):
     df = X.copy()
@@ -152,6 +166,7 @@ def preprocess_passengers_data(file_path):
     data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
     data = assign_areas(data, 'latitude', 'longitude')
     data = convert_cluster_to_numeric(data)
+    data = add_area_grade_column(data)
     return data
 
 
