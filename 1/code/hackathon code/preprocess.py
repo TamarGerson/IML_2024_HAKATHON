@@ -1,3 +1,4 @@
+import statsmodels.api as sm
 import numpy as np
 from geopy.distance import geodesic
 import pandas as pd
@@ -308,11 +309,28 @@ def convert_cluster_to_numeric(data):
     data['cluster'], _ = pd.factorize(data['cluster'])
     return data
 
+def clean_door_open_time(X: pd.DataFrame) -> pd.DataFrame:
+    threshold = 100
+    if 'door_open_time' in X.columns:
+        X = X[X['door_open_time'] <= threshold]
+    return X
+
+def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
+    if 'passengers_continue' in X.columns and 'passengers_continue_menupach' in X.columns:
+        X['mult_passengers_menupach'] = X['passengers_continue'] * X['passengers_continue_menupach']
+    return X
+
+
+def get_hen_fet_cor(X: pd.DataFrame):
+    for t in FET_HENHECER:
+        fet_1, fet_2 = t
+        X = mult_cul(X, fet_1, fet_2)
+    return X
+
 
 ################################ - PART A - ################################
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
                             ,"passengers_continue"]
-
 
 
 FET_HENHECER = [
@@ -339,26 +357,22 @@ OUTLIERS_FUNC = {
     "clean_time_in_station": clean_time_in_station
     , "clean_half_persons": clean_half_persons
     , "clean_negative_passengers": clean_negative_passengers
+    ,"clean_door_open_time" : clean_door_open_time #TODO: DIFFERENT MATHOD
 }
 
-def get_hen_fet_cor(X: pd.DataFrame):
-    for t in FET_HENHECER:
-        fet_1, fet_2 = t
-        X = mult_cul(X, fet_1, fet_2)
-    return X
 
 
 PREP_FUNC = {
-    "delete_null": delete_null
-    , "delete_outliers": delete_outliers
-    ,"add_rush_h_col": add_rush_h_col #replace with add method for all
+    "add_rush_h_col": add_rush_h_col #replace with add method for all
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
+    ,"add_square_station_index_column":add_square_station_index_column
+    ,"add_people_multiplication" : add_people_multiplication
     # ,"numeric_cols" : numeric_cols
 
-    #,"add_square_station_index_column":add_square_station_index_column
+    ,"convert_time_to_float" : convert_time_to_float
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
-   # ,"add_people_multiplication" : add_people_multiplication
+
     ,"get_hen_fet_cor" : get_hen_fet_cor
 }
 
@@ -375,9 +389,14 @@ COLUMNS_TO_DELETE = {
     'passengers_up': 'passengers_up',
 }
 
+
+
 # :#############################################################
 def preprocess_data(X: pd.DataFrame):
     
+    X = delete_null(X)
+    X = delete_outliers(X)
+
     for proc_f in PREP_FUNC.values():
         X = proc_f(X)
     

@@ -10,6 +10,8 @@ for example:
     python code/main.py --training_set /cs/usr/gililior/training.csv --test_set /cs/usr/gililior/test.csv --out predictions/trip_duration_predictions.csv 
 
 """
+def preprocess_passengers_train(training_data):
+    pass
 
 
 def load_data(set_path):
