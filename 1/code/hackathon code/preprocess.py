@@ -332,9 +332,9 @@ PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
 
 FET_HENHECER = [
     # ("arrival_time", "passengers_continue")
-    ("direction", "rush_hour")
+    #("direction", "rush_hour")
     # ,("direction", "arrival_time")
-    ,("rush_hour", "station_id")
+    ("rush_hour", "station_id")
     # ,("arrival_time", "station_id")
 ]
 
@@ -370,10 +370,23 @@ PREP_FUNC = {
     ,"add_area_grade_column" : add_area_grade_column
     # ,"numeric_cols" : numeric_cols
     
-    ,"add_square_station_index_column":add_square_station_index_column
+    #,"add_square_station_index_column":add_square_station_index_column
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
     
     ,"get_hen_fet_cor" : get_hen_fet_cor
+}
+
+COLUMNS_TO_DELETE = {
+    'cluster': 'cluster',
+    'direction': 'direction',
+    'lat': 'latitude',
+    'long': 'longitude',
+    'line_id': 'line_id',
+    'station_id': 'station_id',
+    'rush_hour': 'rush_hour',
+    'trip_id': 'trip_id_unique',
+    'trip_id_unique_station': 'trip_id_unique_station',
+    'passengers_up': 'passengers_up',
 }
 
 # :#############################################################
@@ -390,7 +403,17 @@ def preprocess_passengers_data(file_path):
     data = add_30_minute_interval(data, 'arrival_time', '30_min_interval')
     data = assign_areas(data, 'latitude', 'longitude')
     data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
+    data = delete_columns(data)
     return data
+
+def delete_columns(X: pd.DataFrame) -> pd.DataFrame:
+    columns_dict = COLUMNS_TO_DELETE
+    for col in columns_dict.keys():
+        if col in X.columns:
+            X = X.drop(columns=[col])
+    return X
+
+
 # :#############################################################
 
 
