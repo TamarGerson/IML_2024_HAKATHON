@@ -82,14 +82,14 @@ def delete_outliers(X: pd.DataFrame):
 def numeric_cols(X: pd.DataFrame):
     columns = [["passengers_up"]]
     for col in columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).round().astype(int)
-    return df
+        X[col] = pd.to_numeric(X[col], errors='coerce').fillna(0).round().astype(int)
+    return X
 
 
 OUTLIERS_KEYS = [
-    "clean_half_persons",
-    "clean_time_in_station",
-    "clean_negative_passengers"
+    "clean_half_persons"
+    ,"clean_time_in_station"
+    ,"clean_negative_passengers"
 ]
 
 
