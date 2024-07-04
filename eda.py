@@ -45,7 +45,7 @@ def plot_all_correlations(df, target_column, save_folder):
                 save_plotly_fig(fig, save_folder, file_name)
                 
                 
-def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
+def determine_rush_hours(df, time_column, plot=True, encoding='utf-8'):
     """
     Determine rush hours based on transportation data.
 
@@ -58,13 +58,6 @@ def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
     Returns:
     List of int: Rush hours identified by the data.
     """
-    try:
-        # Load the CSV file into a DataFrame
-        df = pd.read_csv(csv_file, encoding=encoding)
-    except UnicodeDecodeError:
-        # If a UnicodeDecodeError occurs, try a different encoding
-        print(f"Failed to read CSV file with encoding '{encoding}'. Trying 'latin1' instead.")
-        df = pd.read_csv(csv_file, encoding='latin1')
 
     # Convert the time column to datetime
     df[time_column] = pd.to_datetime(df[time_column])
@@ -92,11 +85,11 @@ def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
 
 
 
-
-if __name__ == '__main__':
-    csv_file = 'train_data.csv'  # Replace with your CSV file path
-    time_column = 'timestamp'  # Replace with your time column name
-    rush_hours = determine_rush_hours(csv_file, time_column)
-    print("Rush hours based on the data:", rush_hours)
-    
-    pass
+#
+# if __name__ == '__main__':
+#     csv_file = 'train_data.csv'  # Replace with your CSV file path
+#     time_column = 'timestamp'  # Replace with your time column name
+#     rush_hours = determine_rush_hours(csv_file, time_column)
+#     print("Rush hours based on the data:", rush_hours)
+#
+#     pass
