@@ -18,7 +18,6 @@ from scipy.stats import pearsonr
 # and ensure a more reliable service. 
 
 
-PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
                              ,"passengers_continue"]
 
