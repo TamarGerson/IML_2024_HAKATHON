@@ -62,6 +62,13 @@ def clean_half_persons(X: pd.DataFrame):
 
 #TODO station---------------------------------------------------------------::
 def clean_time_in_station(X: pd.DataFrame):
+    
+    if 'door_closing_time' not in X.columns or 'arrival_time' not in X.columns:
+        raise ValueError("clean_time_in_station - missimg column")
+    
+    X['door_closing_time'] = pd.to_datetime(X['door_closing_time'])
+    X['arrival_time'] = pd.to_datetime(X['arrival_time'])
+    
     X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
     return X
 #station---------------------------------------------------------------::
