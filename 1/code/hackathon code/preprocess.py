@@ -1,3 +1,4 @@
+import statsmodels.api as sm
 import numpy as np
 from geopy.distance import geodesic
 import pandas as pd
@@ -7,6 +8,12 @@ from scipy.stats import pearsonr
 from datetime import datetime
 
 datetime_format = "%H:%M:%S"
+RUSH_OR_SCALE = 1
+SCALE = 0
+MARK = 1
+RUSH_H_HYPER = 1
+NUM_OF_RUSH_H = 6
+
 
 # passengers_continue_menupach
 # The Passenger Continuity Inflation Factor (PCIF) 
@@ -20,35 +27,59 @@ datetime_format = "%H:%M:%S"
 # to a transportation schedule to account for potential delays
 # and ensure a more reliable service. 
 
+def convert_time_to_float(df: pd.DataFrame):
+    
+    df['hours'] = df['arrival_time'].apply(lambda x: x.hour)
+    df['minutes'] = df['arrival_time'].apply(lambda x: x.minute)
+    df['hours_float'] = df['hours'] + df['minutes'] / 60
+    
+    return df
 
-
-
-
-
-# TODO: trip_id -> int (id)
-# TODO: part -> int (id)
-# TODO: trip_id_unique_station -> int (id)
-# TODO: trip_id_unique -> int (id)
-# TODO: line_id id -> int (id)
-# IS LINE ID RELEVANT (DEST 9 vs 15 rehavia)
-# TODO: alternative -> number of alternatives?
-# TODO: cluster -> int(id)
-# TODO: station_name -> needed? id and index
-# TODO: arrival_time -> hh only? peak time only {0,1}
-# DO WE NEED TO ADD time^2
-# TODO: door_closing_time - arrival_time ? more passenj.
 
 
 def add_rush_h_col(X: pd.DataFrame) -> pd.DataFrame:
-    
     rush_hours = get_rush_h(X)
-    print(rush_hours)
+
+    if RUSH_OR_SCALE == SCALE:
+        mathod = scale_rush_hours 
+    else:
+        mathod = add_rush_mark
+    X = mathod(X, rush_hours)
+
+    return X
+
+
+
+def add_rush_mark(X: pd.DataFrame, rush_hours: list):
+    
     def is_rush_hour(hour):
-        return 1 if hour in rush_hours else 0
+        return RUSH_H_HYPER if hour in rush_hours else 0
     
     X['hour'] = X['arrival_time'].dt.hour
     X['rush_hour'] = X['hour'].apply(is_rush_hour)
     return X
+
+
+
+def scale_rush_hours(df: pd.DataFrame, rush_hours: list) -> pd.DataFrame:
+    
+    passenger_counts = dict(zip(df['hour'], df['passengers_up']))
+    max_passengers = max(passenger_counts.values())
+    min_passengers = min(passenger_counts.values())
+    scale_factor = 9 / (max_passengers - min_passengers) if max_passengers != min_passengers else 1
+
+    scaled_rush_hours = []
+
+    for hour in df['hour']:
+        if hour in passenger_counts:
+            passengers = passenger_counts[hour]
+            grade = 1 + scale_factor * (passengers - min_passengers)
+            scaled_rush_hours.append(round(grade))
+        else:
+            scaled_rush_hours.append(0)  # Handle missing hour data
+
+    df['rush_hour'] = scaled_rush_hours
+    return df  # Return None if inplace=True (to match pandas convention)
 
 
 
@@ -58,7 +89,7 @@ def get_rush_h(X: pd.DataFrame):
     X['hour'] = X['arrival_time'].dt.hour
     hourly_passenger_counts = X.groupby('hour')["passengers_up"].sum()
 
-    rush_hours = hourly_passenger_counts.nlargest(6).index.tolist()
+    rush_hours = hourly_passenger_counts.nlargest(NUM_OF_RUSH_H).index.tolist()
     return rush_hours
 
 
@@ -70,16 +101,13 @@ def mult_cul(X: pd.DataFrame, col_1, col_2):
 
 
 
-
-# TODO PASSENGERS---------------------------------------------------------------:
-# TODO: passengers_continue -> threshold? pas_up?
 def clean_negative_passengers(X: pd.DataFrame):
     for passeng_fitch in PASSENGER_PRE_PRO_COLUMNS:
         X = X[X[passeng_fitch] >= 0]
     return X
 
 
-#   -> no floats (clean_half_pepole())
+
 def clean_half_persons(X: pd.DataFrame):
     for passeng_fitch in PASSENGER_PRE_PRO_COLUMNS:
         X[passeng_fitch] = pd.to_numeric(X[passeng_fitch], errors='coerce')
@@ -87,10 +115,7 @@ def clean_half_persons(X: pd.DataFrame):
     return X
 
 
-# PASSENGERS---------------------------------------------------------------:
 
-
-#TODO station---------------------------------------------------------------::
 def clean_time_in_station(X: pd.DataFrame) -> pd.DataFrame:
     # Ensure columns exist
     if 'door_closing_time' not in X.columns or 'arrival_time' not in X.columns:
@@ -107,12 +132,15 @@ def clean_time_in_station(X: pd.DataFrame) -> pd.DataFrame:
     X = X[(X['door_closing_time'] - X['arrival_time']) >= pd.Timedelta(0)]
     
     return X
-# time------------------------------------------------------------------::
+
+
 
 def convert_to_datetime(df, columns = ['arrival_time', 'door_closing_time']):
     for col in columns:
         df[col] = pd.to_datetime(df[col], format='%H:%M:%S', errors='coerce')
     return df
+
+
 
 def calculate_time_diff(df, start_column, end_column, diff_column_name = "diff time"):
     df = convert_to_datetime(df, [start_column, end_column])
@@ -128,7 +156,6 @@ def calculate_time_diff(df, start_column, end_column, diff_column_name = "diff t
     return df
 
 
-# station---------------------------------------------------------------::
 
 def add_last_station_column(data):
     # Determine the last station for each trip_id_unique
@@ -137,10 +164,12 @@ def add_last_station_column(data):
     return data
 
 
+
 def add_square_station_index_column(data):
     # Create a column for the square of station_index
     data['station_index_squared'] = data['station_index'] ** 2
     return data
+
 
 
 def add_30_minute_interval(df, time_column, interval_column_name):
@@ -151,10 +180,12 @@ def add_30_minute_interval(df, time_column, interval_column_name):
     return df
 
 
+
 def assign_areas(df, lat_column, lon_column):
     # Define your own logic for areas, here we use a simple grid approach
     df['area'] = df.apply(lambda row: f"Area_{int(row[lat_column])}_{int(row[lon_column])}", axis=1)
     return df
+
 
 
 def add_area_grade_column(data):
@@ -170,7 +201,8 @@ def add_area_grade_column(data):
     data = data.merge(avg_passengers_per_area[['cluster', 'area_grade']], on='cluster', how='left')
     return data
 
-# TODO ALL---------------------------------------------------------------:::
+
+
 def delete_null(X: pd.DataFrame):
     df = X.copy()
     X = df.dropna()  # .drop_duplicates()
@@ -182,7 +214,7 @@ def delete_outliers(X: pd.DataFrame):
     for lier in OUTLIERS_KEYS:
         OUTLIERS_FUNC[lier](X)
     return X
-# ALL---------------------------------------------------------------:::
+
 
 
 def numeric_cols(X: pd.DataFrame):
@@ -193,7 +225,24 @@ def numeric_cols(X: pd.DataFrame):
 
 
 
+def convert_cluster_to_numeric(data):
+    data['cluster'], _ = pd.factorize(data['cluster'])
+    return data
 
+
+
+def clean_door_open_time(X: pd.DataFrame) -> pd.DataFrame:
+    threshold = 100
+    if 'door_open_time' in X.columns:
+        X = X[X['door_open_time'] <= threshold]
+    return X
+
+
+
+def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
+    if 'passengers_continue' in X.columns and 'passengers_continue_menupach' in X.columns:
+        X['mult_passengers_menupach'] = X['passengers_continue'] * X['passengers_continue_menupach']
+    return X
 
 
 
@@ -267,69 +316,75 @@ def merge_summary_with_data(data, trip_summary):
     return pd.merge(data, trip_summary, on='trip_id_unique')
 
 
-# def preprocess_trip_data(file_path):
-#     data = read_and_preprocess_data(file_path)
-#     trip_summary = create_trip_summary(data)
-#     merged_data = merge_summary_with_data(data, trip_summary)
-#     return merged_data
 
-def convert_cluster_to_numeric(data):
-    data['cluster'], _ = pd.factorize(data['cluster'])
-    return data
+def get_hen_fet_cor(X: pd.DataFrame):
+    for t in FET_HENHECER:
+        fet_1, fet_2 = t
+        X = mult_cul(X, fet_1, fet_2)
+    return X
 
+# ------------------------------------------PART B----------------------------------------#
 
-# -------------------------------------------------------------------------------
+################################ - PART A - ################################
+
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
                             ,"passengers_continue"]
 
 
-
 FET_HENHECER = [
-    ("arrival_time", "passengers_continue")
+    ("hours_float", "passengers_continue")
     ,("direction", "rush_hour")
-    ,("direction", "arrival_time")
+    ,("direction", "hours_float")
     ,("rush_hour", "station_id")
-    ,("arrival_time", "station_id")
+    ,("hours_float", "station_id")
+    ,("rush_hour", "rush_hour")
 ]
+
 
 ADD_FIT_KEY = [
     "add_rush_h_col"
     ,"add_last_station_column"
 ]
 
+
 OUTLIERS_KEYS = [
-    "clean_half_persons"
     # ,"clean_time_in_station"
+    "clean_half_persons"
     , "clean_negative_passengers"
+    ,"clean_door_open_time"
 ]
+
 
 OUTLIERS_FUNC = {
     "clean_time_in_station": clean_time_in_station
     , "clean_half_persons": clean_half_persons
     , "clean_negative_passengers": clean_negative_passengers
+    ,"clean_door_open_time" : clean_door_open_time #TODO: DIFFERENT MATHOD
 }
 
-def get_hen_fet_cor(X: pd.DataFrame):
-    for fet_1, fet_2 in FET_HENHECER:
-        X = mult_cul(X, fet_1, fet_2)
-    return X
 
 PREP_FUNC = {
-    "delete_null": delete_null
-    , "delete_outliers": delete_outliers
-    ,"add_rush_h_col": add_rush_h_col #replace with add method for all
+    "add_rush_h_col": add_rush_h_col #replace with add method for all
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
-    # ,"numeric_cols" : numeric_cols
-    
     ,"add_square_station_index_column":add_square_station_index_column
+    ,"add_people_multiplication" : add_people_multiplication
+    ,"numeric_cols" : numeric_cols
+    
+    ,"convert_time_to_float" : convert_time_to_float
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
     
     ,"get_hen_fet_cor" : get_hen_fet_cor
 }
 
+
+
 # :#############################################################
+
 def preprocess_data(X: pd.DataFrame):
+    
+    X = delete_null(X)
+    X = delete_outliers(X)
     
     for proc_f in PREP_FUNC.values():
         X = proc_f(X)
@@ -343,11 +398,30 @@ def preprocess_passengers_data(file_path):
     data = assign_areas(data, 'latitude', 'longitude')
     data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
     return data
+
 # :#############################################################
+################################ - PART A - ################################
 
 
+#DEBUG:
+def print_col(df):
+    print("###############################")
+    print("\n")
+    print("\n")
+    column = list(df.columns)
+    print(column)
+    print("\n")
+    print("\n")
+    print("###############################")
+    return
 
 if __name__ == '__main__':
 
-    
+    #todo
+    #graded clusters
+    #add graded hour
+    #mult people with people menupach
+    #mult continue with people menupach
+
+
     pass

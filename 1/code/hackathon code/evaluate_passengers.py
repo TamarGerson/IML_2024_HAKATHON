@@ -35,11 +35,19 @@ def perform_linear_regression(train_data, test_data, target_column):
     print(f"Mean Squared Error on the test data: {mse}")
 
 
-def evaluate_preprocess(file_path, test_size_percentage, seed):
-    train_data, test_data = split_data(file_path, test_size_percentage, seed)
-    # basic preprocess for train and test
-    # advanced preprocess
-    # linear regression for both
+def train_passengers_forest_model(X_train, y_train):
+    rf = RandomForestRegressor(random_state=42)
+    param_grid = {
+        'n_estimators': [100, 200],
+        'max_depth': [10, 20, None],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+    }
+    grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1, verbose=2)
+    grid_search.fit(X_train, y_train)
+    best_rf = grid_search.best_estimator_
+    return best_rf
+
 
 if __name__ == "__main__":
     if len(sys.argv) != NUM_OF_ARGUMENTS:
@@ -47,7 +55,7 @@ if __name__ == "__main__":
     else:
         file_path = sys.argv[1]
         train_data = preprocess_passengers_data(file_path)
-        plot_avg_passengers_per_interval_by_area(train_data, TARGET_COLUMN)
+        # plot_avg_passengers_per_interval_by_area(train_data, TARGET_COLUMN)
         plot_all_correlations(train_data, TARGET_COLUMN, "first_try")
 
 
