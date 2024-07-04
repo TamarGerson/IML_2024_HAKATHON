@@ -41,6 +41,7 @@ def evaluate_preprocess(file_path, test_size_percentage, seed):
     # advanced preprocess
     # linear regression for both
 
+
 if __name__ == "__main__":
     if len(sys.argv) != NUM_OF_ARGUMENTS:
         print("Usage: python evaluate_passengers.py <file_path>")
