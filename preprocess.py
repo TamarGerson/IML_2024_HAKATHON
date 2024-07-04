@@ -1,11 +1,14 @@
 import numpy as np
 import pandas as pd
 from geopy.distance import geodesic
+import plotly.express as px
+from scipy.stats import pearsonr
+
+
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
                              ,"passengers_continue"]
-import plotly.express as px
-from scipy.stats import pearsonr
+
 
 
 #TODO: trip_id -> int (id)
@@ -54,18 +57,10 @@ def clean_time_in_station(X: pd.DataFrame):
 
 
 #TODO ALL---------------------------------------------------------------:::
-def delete_null(X: pd.DataFrame, y = None):
-    
+def delete_null(X: pd.DataFrame):
     df = X.copy()
-    df["lable"] = y
-    
-    df = df.dropna() #.drop_duplicates() 
-    df = df[df["lable"] < 0] # no negative number of pass
-    
-    y = df["lable"]
-    X = df.drop(columns = ["lable"])
-    
-    return X, y
+    X = df.dropna() #.drop_duplicates() 
+    return X
 
 
 
@@ -84,9 +79,9 @@ def numeric_cols(X: pd.DataFrame):
 
 
 OUTLIERS_KEYS = [
-    "clean_half_persons",
-    "clean_time_in_station",
-    "clean_negative_passengers"
+    "clean_half_persons"
+    ,"clean_time_in_station"
+    ,"clean_negative_passengers"
 ]
 
 
@@ -116,6 +111,9 @@ def preprocess_passengers_data(file_path):
 
 
 
+# TODO:
+def read_and_preprocess_data(file_path):
+    pass
 #------------------------------------------PART B----------------------------------------#
 
 def calculate_trip_duration(grouped):
