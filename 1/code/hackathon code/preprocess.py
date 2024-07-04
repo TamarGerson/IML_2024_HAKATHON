@@ -321,6 +321,13 @@ def add_people_multiplication(X: pd.DataFrame) -> pd.DataFrame:
     return X
 
 
+def get_hen_fet_cor(X: pd.DataFrame):
+    for t in FET_HENHECER:
+        fet_1, fet_2 = t
+        X = mult_cul(X, fet_1, fet_2)
+    return X
+
+
 ################################ - PART A - ################################
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
                             ,"passengers_continue"]
@@ -354,11 +361,6 @@ OUTLIERS_FUNC = {
     ,"clean_door_open_time" : clean_door_open_time #TODO: DIFFERENT MATHOD
 }
 
-def get_hen_fet_cor(X: pd.DataFrame):
-    for t in FET_HENHECER:
-        fet_1, fet_2 = t
-        X = mult_cul(X, fet_1, fet_2)
-    return X
 
 
 PREP_FUNC = {
