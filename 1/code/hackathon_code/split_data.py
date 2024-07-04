@@ -7,10 +7,13 @@ import numpy as np
 def split_data_to_csv(file_path, test_size_percentage, seed):
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
     test_size = test_size_percentage / 100.0
-    train_data, test_data = train_test_split(data, test_size=test_size, random_state=seed)
-    train_data = train_data.drop("passengers_up", axis=1)
-    train_data.to_csv('test10.csv', index=False, encoding="ISO-8859-8")
-    test_data.to_csv('test.csv', index=False, encoding="ISO-8859-8")
+    train, temp_data = train_test_split(data, test_size=test_size, random_state=seed)
+    test10gold, test = train_test_split(temp_data, test_size=test_size, random_state=seed)
+    test10 = test10gold.drop("passengers_up", axis=1)
+    train.to_csv('train.csv', index=False, encoding="ISO-8859-8")
+    test10.to_csv('test10.csv', index=False, encoding="ISO-8859-8")
+    test10gold.to_csv('test10gold.csv', index=False, encoding="ISO-8859-8")
+    test.to_csv('test.csv', index=False, encoding="ISO-8859-8")
 
     print(f"Data split completed. Training data saved to 'train_data.csv' and test data saved to 'test_data.csv'.")
 
