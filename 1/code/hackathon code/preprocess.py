@@ -110,10 +110,7 @@ def get_rush_h(X: pd.DataFrame):
 
 
 def mult_cul(X: pd.DataFrame, col_1, col_2):
-    print_col(X) #TODO
-    print(X)
     col_name = "{}_vs_{}".format(col_1, col_2)
-    print(col_name) #TODO
     X[col_name] = X[col_1] * X [col_2]
     return X
 
