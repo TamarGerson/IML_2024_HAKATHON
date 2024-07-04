@@ -57,18 +57,10 @@ def clean_time_in_station(X: pd.DataFrame):
 
 
 #TODO ALL---------------------------------------------------------------:::
-def delete_null(X: pd.DataFrame, y = None):
-    
+def delete_null(X: pd.DataFrame):
     df = X.copy()
-    df["lable"] = y
-    
-    df = df.dropna() #.drop_duplicates() 
-    df = df[df["lable"] < 0] # no negative number of pass
-    
-    y = df["lable"]
-    X = df.drop(columns = ["lable"])
-    
-    return X, y
+    X = df.dropna() #.drop_duplicates() 
+    return X
 
 
 
@@ -82,14 +74,14 @@ def delete_outliers(X: pd.DataFrame):
 def numeric_cols(X: pd.DataFrame):
     columns = [["passengers_up"]]
     for col in columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).round().astype(int)
-    return df
+        X[col] = pd.to_numeric(X[col], errors='coerce').fillna(0).round().astype(int)
+    return X
 
 
 OUTLIERS_KEYS = [
-    "clean_half_persons",
-    "clean_time_in_station",
-    "clean_negative_passengers"
+    "clean_half_persons"
+    ,"clean_time_in_station"
+    ,"clean_negative_passengers"
 ]
 
 
@@ -106,6 +98,16 @@ PREP_FUNC = {
     "delete_null" : delete_null
     ,"delete_outliers" : delete_outliers
     }
+
+
+def preprocess_passengers_data(file_path):
+    data = pd.read_csv(file_path, encoding="ISO-8859-8")
+    data = delete_null(data)
+    data = delete_outliers(data)
+    data = clean_negative_passengers(data)
+    data = clean_half_persons(data)
+    data = numeric_cols(data)
+    return data
 
 
 
