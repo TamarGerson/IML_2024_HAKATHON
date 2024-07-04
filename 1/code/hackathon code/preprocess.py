@@ -356,9 +356,11 @@ OUTLIERS_FUNC = {
 }
 
 def get_hen_fet_cor(X: pd.DataFrame):
-    for fet_1, fet_2 in FET_HENHECER:
+    for t in FET_HENHECER:
+        fet_1, fet_2 = t
         X = mult_cul(X, fet_1, fet_2)
     return X
+
 
 PREP_FUNC = {
     "delete_null": delete_null
