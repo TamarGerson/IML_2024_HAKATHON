@@ -327,8 +327,8 @@ def get_hen_fet_cor(X: pd.DataFrame):
 
 ################################ - PART A - ################################
 
-PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
-                            ,"passengers_continue"]
+PASSENGER_PRE_PRO_COLUMNS = [#"passengers_up"  # LABLES
+                            "passengers_continue"]
 
 
 FET_HENHECER = [
@@ -364,8 +364,8 @@ OUTLIERS_FUNC = {
 
 
 PREP_FUNC = {
-    "add_rush_h_col": add_rush_h_col #replace with add method for all
-    ,"add_last_station_column" : add_last_station_column
+    #"add_rush_h_col": add_rush_h_col #replace with add method for all
+    "add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
     ,"add_square_station_index_column":add_square_station_index_column
     ,"add_people_multiplication" : add_people_multiplication
@@ -374,22 +374,33 @@ PREP_FUNC = {
     ,"convert_time_to_float" : convert_time_to_float
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
 
-    ,"get_hen_fet_cor" : get_hen_fet_cor
+    #,"get_hen_fet_cor" : get_hen_fet_cor
 }
 
-# COLUMNS_TO_DELETE = {
-#     'cluster': 'cluster',
-#     'direction': 'direction',
-#     'lat': 'latitude',
-#     'long': 'longitude',
-#     'line_id': 'line_id',
-#     'station_id': 'station_id',
-#     'rush_hour': 'rush_hour',
-#     'trip_id': 'trip_id_unique',
-#     'trip_id_unique_station': 'trip_id_unique_station'
-# }
+COLUMNS_TO_DELETE = {
+    'cluster': 'cluster',
+    'direction': 'direction',
+    'lat': 'latitude',
+    'long': 'longitude',
+    'line_id': 'line_id',
+    'station_id': 'station_id',
+    'rush_hour': 'rush_hour',
+    'trip_id_unique': 'trip_id_unique',
+    'trip_id_unique_station': 'trip_id_unique_station',
+    'arrival_time': 'arrival_time',
+    'arrival_is_estimated': 'arrival_is_estimated',
+    'area': 'area',
+    'direction_vs_hours_float': 'direction_vs_hours_float',
+    'direction_vs_rush_hour': 'direction_vs_rush_hour',
+    'door_closing_time': 'door_closing_time',
+    'hour': 'hour',
+    'part': 'part',
+    'station_name': 'station_name',
+    'alternative' : 'alternative',
+    '30_min_interval': '30_min_interval'
+}
 
-COLUMNS_TO_DELETE = {}
+
 
 
 
@@ -400,18 +411,17 @@ def preprocess_data(X: pd.DataFrame):
     X = delete_null(X)
     X = delete_outliers(X)
 
-    for proc_f in PREP_FUNC.values():
-        X = proc_f(X)
+    # for proc_f in PREP_FUNC.values():
+    #     X = proc_f(X)
     
     return X
 
 
-def preprocess_passengers_data(file_path):
-    data = pd.read_csv(file_path, encoding="ISO-8859-8")
+def preprocess_passengers_data(data):
     data = preprocess_data(data)
-    data = add_30_minute_interval(data, 'arrival_time', '30_min_interval')
-    data = assign_areas(data, 'latitude', 'longitude')
-    data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
+    # data = add_30_minute_interval(data, 'arrival_time', '30_min_interval')
+    # data = assign_areas(data, 'latitude', 'longitude')
+    # data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
     data = delete_columns(data)
     return data
 
@@ -426,43 +436,32 @@ def delete_columns(X: pd.DataFrame) -> pd.DataFrame:
 
 def preprocess_test_data(test_df: pd.DataFrame, train_df: pd.DataFrame) -> pd.DataFrame:
     # List of preprocessing functions to be applied
-    preprocessing_functions = [
-        add_rush_h_col,
-        add_last_station_column,
-        add_area_grade_column,
-        convert_cluster_to_numeric,
-        get_hen_fet_cor,
-        lambda df: add_30_minute_interval(df, 'arrival_time', '30_min_interval'),
-        lambda df: assign_areas(df, 'latitude', 'longitude'),
-        lambda df: calculate_time_diff(df, 'arrival_time', 'door_closing_time'),
-        delete_columns
-    ]
+    # for proc_f in PREP_FUNC.values():
+    #     test_df = proc_f(test_df)
 
-    # Apply preprocessing functions
-    for func in preprocessing_functions:
-        test_df = func(test_df)
+    test_df = delete_columns(test_df)
 
     # Ensure all columns in the train set are in the test set
-    for col in train_df.columns:
-        if col not in test_df.columns:
-            test_df[col] = np.nan
-
-    # Add any new columns to the test set
-    for col in test_df.columns:
-        if col not in train_df.columns:
-            print(f"Column '{col}' is not in the train set")
-            train_df[col] = np.nan
+    # for col in train_df.columns:
+    #     if col not in test_df.columns:
+    #         test_df[col] = np.nan
+    #
+    # # Add any new columns to the test set
+    # for col in test_df.columns:
+    #     if col not in train_df.columns:
+    #         print(f"Column '{col}' is not in the train set")
+    #         train_df[col] = np.nan
 
     # Reorder the columns to match the train set
-    test_df = test_df[train_df.columns]
-
-    # Fill missing values with the median (or floor of the median for range of values)
-    for col in test_df.columns:
-        if test_df[col].isnull().any():
-            median_value = train_df[col].median()
-            if pd.api.types.is_numeric_dtype(train_df[col]):
-                median_value = np.floor(median_value) if isinstance(median_value, float) else median_value
-            test_df[col].fillna(median_value, inplace=True)
+    # test_df = test_df[train_df.columns]
+    #
+    # # Fill missing values with the median (or floor of the median for range of values)
+    # for col in test_df.columns:
+    #     if test_df[col].isnull().any():
+    #         median_value = train_df[col].median()
+    #         if pd.api.types.is_numeric_dtype(train_df[col]):
+    #             median_value = np.floor(median_value) if isinstance(median_value, float) else median_value
+    #         test_df[col].fillna(median_value, inplace=True)
 
     return test_df
 # :#############################################################

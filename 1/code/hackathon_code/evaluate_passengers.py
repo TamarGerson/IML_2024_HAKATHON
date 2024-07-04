@@ -1,6 +1,8 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split, GridSearchCV
 from preprocess import *
 from eda import *
 from split_data import *
@@ -38,8 +40,8 @@ def perform_linear_regression(train_data, test_data, target_column):
 def train_passengers_forest_model(X_train, y_train):
     rf = RandomForestRegressor(random_state=42)
     param_grid = {
-        'n_estimators': [100, 200],
-        'max_depth': [10, 20, None],
+        'n_estimators': [80, 150],
+        'max_depth': [5, 10, None],
         'min_samples_split': [2, 5, 10],
         'min_samples_leaf': [1, 2, 4],
     }
