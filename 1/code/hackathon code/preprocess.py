@@ -331,11 +331,11 @@ PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
 
 
 FET_HENHECER = [
-    ("arrival_time", "passengers_continue")
-    ,("direction", "rush_hour")
-    ,("direction", "arrival_time")
+    # ("arrival_time", "passengers_continue")
+    ("direction", "rush_hour")
+    # ,("direction", "arrival_time")
     ,("rush_hour", "station_id")
-    ,("arrival_time", "station_id")
+    # ,("arrival_time", "station_id")
 ]
 
 ADD_FIT_KEY = [
