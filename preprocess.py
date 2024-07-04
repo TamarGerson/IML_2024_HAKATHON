@@ -1,11 +1,14 @@
 import numpy as np
 import pandas as pd
 from geopy.distance import geodesic
+import plotly.express as px
+from scipy.stats import pearsonr
+
+
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
                              ,"passengers_continue"]
-import plotly.express as px
-from scipy.stats import pearsonr
+
 
 
 #TODO: trip_id -> int (id)
