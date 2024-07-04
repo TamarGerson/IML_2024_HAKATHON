@@ -45,9 +45,51 @@ def plot_all_correlations(df, target_column, save_folder):
                 save_plotly_fig(fig, save_folder, file_name)
                 
                 
-def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
+# def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
+#     """
+#     Determine rush hours based on transportation data.
+
+#     Parameters:
+#     csv_file (str): Path to the CSV file containing transportation data.
+#     time_column (str): The name of the column containing timestamp data.
+#     passenger_column (str): The name of the column containing the number of passengers.
+#     plot (bool): Whether to plot the distribution of trips/passengers by hour.
+#     encoding (str): The encoding used to read the CSV file.
+#     datetime_format (str): The format of the datetime strings in the time column.
+
+#     Returns:
+#     List of int: Rush hours identified by the data.
+#     """
+
+#     # Convert the time column to datetime
+#     df[time_column] = pd.to_datetime(df[time_column], format=datetime_format)
+
+#     # Extract the hour from the time column
+#     df['hour'] = df[time_column].dt.hour
+
+#     # Group by hour and sum the number of passengers
+#     hourly_passenger_counts = df.groupby('hour')[passenger_column].sum()
+
+#     # Identify the rush hours (e.g., top 3 hours with the highest counts)
+#     rush_hours = hourly_passenger_counts.nlargest(3).index.tolist()
+
+#     if plot:
+#         # Plot the distribution of passengers by hour
+#         hourly_passenger_counts.plot(kind='bar', color='skyblue')
+#         plt.xlabel('Hour of the Day')
+#         plt.ylabel('Number of Passengers')
+#         plt.title('Distribution of Passengers by Hour')
+#         plt.axhline(y=hourly_passenger_counts.mean(), color='r', linestyle='--', label='Average')
+#         plt.legend()
+#         plt.show()
+
+#     return rush_hours
+
+import matplotlib.pyplot as plt
+
+def determine_rush_hours(csv_file, time_column, passenger_column, plot=True, encoding='utf-8', datetime_format=None):
     """
-    Determine rush hours based on transportation data.
+    Determine rush hours based on the sum of passengers in the transportation data.
 
     Parameters:
     csv_file (str): Path to the CSV file containing transportation data.
@@ -60,6 +102,13 @@ def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
     Returns:
     List of int: Rush hours identified by the data.
     """
+    try:
+        # Load the CSV file into a DataFrame
+        df = pd.read_csv(csv_file, encoding=encoding)
+    except UnicodeDecodeError:
+        # If a UnicodeDecodeError occurs, try a different encoding
+        print(f"Failed to read CSV file with encoding '{encoding}'. Trying 'latin1' instead.")
+        df = pd.read_csv(csv_file, encoding='latin1')
 
     # Convert the time column to datetime
     df[time_column] = pd.to_datetime(df[time_column], format=datetime_format)
@@ -87,11 +136,12 @@ def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
 
 
 
-
 if __name__ == '__main__':
     csv_file = 'train_data.csv'  # Replace with your CSV file path
-    time_column = 'timestamp'  # Replace with your time column name
-    rush_hours = determine_rush_hours(csv_file, time_column)
+    time_column = 'arrival_time'  # Replace with your time column name
+    passenger_column = 'passengers_up'  # Replace with the actual passenger column name in your CSV file
+    datetime_format = "%H:%M:%S"  # Adjust the format based on the actual format of your timestamps
+    rush_hours = determine_rush_hours(csv_file, time_column, passenger_column, datetime_format=datetime_format)
     print("Rush hours based on the data:", rush_hours)
     
     pass
