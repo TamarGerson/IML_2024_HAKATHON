@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import logging
 import pandas as pd
+from hackathon_code.evaluate_passengers.py import *
 
 """
 usage:
@@ -10,6 +11,8 @@ for example:
     python code/main.py --training_set /cs/usr/gililior/training.csv --test_set /cs/usr/gililior/test.csv --out predictions/trip_duration_predictions.csv 
 
 """
+
+
 def preprocess_passengers_train(training_data):
     pass
 
@@ -43,7 +46,7 @@ if __name__ == '__main__':
     X_train, y_train = preprocess_passengers_train(training_data)
     # 3. train a model
     logging.info("training...")
-    model = train_passengers_model(X_train, y_train)
+    model = train_passengers_linear_model(X_train, y_train)
     # 4. load the test set (args.test_set)
     # 5. preprocess the test set
     logging.info("preprocessing test...")
