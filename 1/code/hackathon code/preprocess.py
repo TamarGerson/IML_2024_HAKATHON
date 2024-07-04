@@ -94,7 +94,7 @@ def scale_rush_hours(df: pd.DataFrame, rush_hours: list) -> pd.DataFrame:
             scaled_rush_hours.append(0)  # Handle missing hour data
 
     
-    df['rush_hour_grade'] = scaled_rush_hours
+    df['rush_hour'] = scaled_rush_hours
     return df  # Return None if inplace=True (to match pandas convention)
 
 
@@ -110,7 +110,10 @@ def get_rush_h(X: pd.DataFrame):
 
 
 def mult_cul(X: pd.DataFrame, col_1, col_2):
+    print_col(X) #TODO
+    print(X)
     col_name = "{}_vs_{}".format(col_1, col_2)
+    print(col_name) #TODO
     X[col_name] = X[col_1] * X [col_2]
     return X
 
@@ -394,6 +397,18 @@ def preprocess_passengers_data(file_path):
 # :#############################################################
 
 
+
+#DEBUG:
+def print_col(df):
+    print("###############################")
+    print("\n")
+    print("\n")
+    column = list(df.columns)
+    print(column)
+    print("\n")
+    print("\n")
+    print("###############################")
+    return
 
 if __name__ == '__main__':
 
