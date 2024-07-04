@@ -1,4 +1,7 @@
 import pandas as pd
+from scipy.stats import pearsonr
+
+
 def plot_correlation(df, column1, column2):
     # Calculate the correlation coefficient
     correlation, _ = pearsonr(df[column1].dropna(), df[column2].dropna())
