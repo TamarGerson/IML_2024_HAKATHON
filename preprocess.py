@@ -5,7 +5,19 @@ import plotly.express as px
 from scipy.stats import pearsonr
 
 
-PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
+# passengers_continue_menupach
+# The Passenger Continuity Inflation Factor (PCIF) 
+# in transportation refers to the additional time built 
+# into a schedule to account for the process of passengers boarding,
+# alighting, and transferring between services.
+
+#mekadem_nipuach_luz
+# The timetable inflation factor (TIF)
+# in transportation refers to the practice of adding extra time
+# to a transportation schedule to account for potential delays
+# and ensure a more reliable service. 
+
+
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
                              ,"passengers_continue"]
 
@@ -50,6 +62,13 @@ def clean_half_persons(X: pd.DataFrame):
 
 #TODO station---------------------------------------------------------------::
 def clean_time_in_station(X: pd.DataFrame):
+    
+    if 'door_closing_time' not in X.columns or 'arrival_time' not in X.columns:
+        raise ValueError("clean_time_in_station - missimg column")
+    
+    X['door_closing_time'] = pd.to_datetime(X['door_closing_time'])
+    X['arrival_time'] = pd.to_datetime(X['arrival_time'])
+    
     X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
     return X
 #station---------------------------------------------------------------::
