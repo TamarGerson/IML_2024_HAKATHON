@@ -5,6 +5,19 @@ import plotly.express as px
 from scipy.stats import pearsonr
 
 
+# passengers_continue_menupach
+# The Passenger Continuity Inflation Factor (PCIF) 
+# in transportation refers to the additional time built 
+# into a schedule to account for the process of passengers boarding,
+# alighting, and transferring between services.
+
+#mekadem_nipuach_luz
+# The timetable inflation factor (TIF)
+# in transportation refers to the practice of adding extra time
+# to a transportation schedule to account for potential delays
+# and ensure a more reliable service. 
+
+
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up", "passengers_continue"]
 PASSENGER_PRE_PRO_COLUMNS = ["passengers_up" #LABLES
                              ,"passengers_continue"]
