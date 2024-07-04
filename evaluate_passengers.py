@@ -2,7 +2,11 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from preprocess import *
+from eda import *
+import sys
 
+NUM_OF_ARGUMENTS = 2
+TARGET_COLUMN = 'passengers_up'
 
 def perform_linear_regression(train_data, test_data, target_column):
     # Separate features and target variable from training data
@@ -29,11 +33,12 @@ def perform_linear_regression(train_data, test_data, target_column):
 
 
 if __name__ == "__main__":
-    # Get the train and test data
-    train_data, test_data = passengers_data()
+    if len(sys.argv) != NUM_OF_ARGUMENTS:
+        print("Usage: python evaluate_passengers.py <file_path>")
+    else:
+        file_path = sys.argv[1]
+        train_data = preprocess_passengers_data(file_path)
+        target_column = TARGET_COLUMN
 
-    # Specify the target column
-    target_column = 'your_target_column'  # Replace with your target column name
-
-    # Perform linear regression and evaluate the loss
-    perform_linear_regression(train_data, test_data, target_column)
+        # Perform linear regression and evaluate the loss
+        # perform_linear_regression(train_data, test_data, target_column)
