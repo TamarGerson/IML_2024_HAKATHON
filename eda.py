@@ -25,14 +25,16 @@ def plot_correlation(df, column1, column2):
     return fig
 
 
-def plot_avg_passengers_per_interval(df, time_column, passengers_column):
-    # Calculate the average passengers up per 10-minute interval
-    avg_passengers = df.groupby('10_min_interval')[passengers_column].mean().reset_index()
+def plot_avg_passengers_per_interval_by_area(df, passengers_column):
+    # Calculate the average passengers up per 10-minute interval for each area
+    avg_passengers = df.groupby(['area', '10_min_interval'])[passengers_column].mean().reset_index()
 
     # Create the bar chart
-    fig = px.bar(avg_passengers, x='10_min_interval', y=passengers_column,
-                 title='Average Passengers Up per 10-Minute Interval')
-    fig.update_layout(xaxis_title='Time Interval', yaxis_title='Average Passengers Up')
+    fig = px.bar(avg_passengers, x='10_min_interval', y=passengers_column, facet_col='area',
+                 title='Average Passengers Up per 10-Minute Interval by Area',
+                 labels={'10_min_interval': 'Time Interval', passengers_column: 'Average Passengers Up'})
+
+    fig.update_layout(showlegend=False)
     fig.show()
 
 
