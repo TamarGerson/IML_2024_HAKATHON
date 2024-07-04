@@ -54,15 +54,22 @@ def clean_half_persons(X: pd.DataFrame):
 # PASSENGERS---------------------------------------------------------------:
 
 
-# TODO station---------------------------------------------------------------::
-def clean_time_in_station(X: pd.DataFrame):
+#TODO station---------------------------------------------------------------::
+def clean_time_in_station(X: pd.DataFrame) -> pd.DataFrame:
+    # Ensure columns exist
     if 'door_closing_time' not in X.columns or 'arrival_time' not in X.columns:
-        raise ValueError("clean_time_in_station - missimg column")
-
+        raise ValueError("DataFrame must contain 'door_closing_time' and 'arrival_time' columns")
+    
+    # Convert columns to datetime if they are not already
     X['door_closing_time'] = pd.to_datetime(X['door_closing_time'])
     X['arrival_time'] = pd.to_datetime(X['arrival_time'])
-
-    X = X[(X['door_closing_time'] - X['arrival_time']) >= 0]
+    
+    # Ensure no missing values in the required columns
+    X = X.dropna(subset=['door_closing_time', 'arrival_time'])
+    
+    # Calculate the time difference and filter rows
+    X = X[(X['door_closing_time'] - X['arrival_time']) >= pd.Timedelta(0)]
+    
     return X
 
 
@@ -216,3 +223,65 @@ def preprocess_trip_data(file_path):
     trip_summary = create_trip_summary(data)
     merged_data = merge_summary_with_data(data, trip_summary)
     return merged_data
+
+
+# -------------------------------------------------------------------------------
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
+    """
+    Determine rush hours based on transportation data.
+
+    Parameters:
+    csv_file (str): Path to the CSV file containing transportation data.
+    time_column (str): The name of the column containing timestamp data.
+    plot (bool): Whether to plot the distribution of trips/passengers by hour.
+
+    Returns:
+    List of int: Rush hours identified by the data.
+    """
+    # Load the CSV file into a DataFrame
+    try:
+        # Load the CSV file into a DataFrame
+        df = pd.read_csv(csv_file, encoding=encoding)
+    except UnicodeDecodeError:
+        # If a UnicodeDecodeError occurs, try a different encoding
+        print(f"Failed to read CSV file with encoding '{encoding}'. Trying 'latin1' instead.")
+        df = pd.read_csv(csv_file, encoding='latin1')
+
+    # Convert the time column to datetime
+    df[time_column] = pd.to_datetime(df[time_column])
+
+    # Extract the hour from the time column
+    df['hour'] = df[time_column].dt.hour
+
+    # Group by hour and count the number of trips/passengers
+    hourly_counts = df.groupby('hour').size()
+
+    # Identify the rush hours (e.g., top 3 hours with the highest counts)
+    rush_hours = hourly_counts.nlargest(3).index.tolist()
+
+    if plot:
+        # Plot the distribution of trips/passengers by hour
+        hourly_counts.plot(kind='bar', color='skyblue')
+        plt.xlabel('Hour of the Day')
+        plt.ylabel('Number of Trips/Passengers')
+        plt.title('Distribution of Trips/Passengers by Hour')
+        plt.axhline(y=hourly_counts.mean(), color='r', linestyle='--', label='Average')
+        plt.legend()
+        plt.show()
+
+    return rush_hours
+
+
+
+
+if __name__ == '__main__':
+    # GET RUSH HOUERS
+    csv_file = 'train_data.csv'  # Replace with your CSV file path
+    time_column = 'arrival_time'  # Replace with your time column name
+    rush_hours = determine_rush_hours(csv_file, time_column)
+    print("Rush hours based on the data:", rush_hours)
+    
+    pass
