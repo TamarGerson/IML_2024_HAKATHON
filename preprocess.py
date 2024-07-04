@@ -1,6 +1,7 @@
 import numpy as np
-import pandas as pd
 from geopy.distance import geodesic
+import pandas as pd
+import matplotlib.pyplot as plt
 import plotly.express as px
 from scipy.stats import pearsonr
 
@@ -128,6 +129,9 @@ OUTLIERS_KEYS = [
     , "clean_negative_passengers"
 ]
 
+
+
+
 OUTLIERS_FUNC = {
     "clean_time_in_station": clean_time_in_station
     , "clean_half_persons": clean_half_persons
@@ -147,7 +151,9 @@ def preprocess_passengers_data(file_path):
     data = add_square_station_index_column(data)
     data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
     data = assign_areas(data, 'latitude', 'longitude')
+    data = convert_cluster_to_numeric(data)
     return data
+
 
 
 # TODO:
@@ -230,10 +236,13 @@ def preprocess_trip_data(file_path):
     merged_data = merge_summary_with_data(data, trip_summary)
     return merged_data
 
+def convert_cluster_to_numeric(data):
+    data['cluster'], _ = pd.factorize(data['cluster'])
+    return data
+
 
 # -------------------------------------------------------------------------------
-import pandas as pd
-import matplotlib.pyplot as plt
+
 
 def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
     """
