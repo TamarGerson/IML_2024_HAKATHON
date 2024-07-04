@@ -404,6 +404,7 @@ def preprocess_data(X: pd.DataFrame):
     
     return X
 
+
 def preprocess_passengers_data(file_path):
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
     data = preprocess_data(data)
