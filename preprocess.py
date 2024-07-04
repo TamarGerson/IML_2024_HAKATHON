@@ -4,6 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
 from scipy.stats import pearsonr
+from datetime import datetime
+
+datetime_format = "%H:%M:%S"
 
 # passengers_continue_menupach
 # The Passenger Continuity Inflation Factor (PCIF) 
@@ -18,8 +21,8 @@ from scipy.stats import pearsonr
 # and ensure a more reliable service. 
 
 
-PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
-    , "passengers_continue"]
+
+
 
 
 # TODO: trip_id -> int (id)
@@ -34,6 +37,44 @@ PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
 # TODO: arrival_time -> hh only? peak time only {0,1}
 # DO WE NEED TO ADD time^2
 # TODO: door_closing_time - arrival_time ? more passenj.
+
+
+def add_rush_h_col(X: pd.DataFrame) -> pd.DataFrame:
+    
+    rush_hours = get_rush_h(X)
+    
+    def is_rush_hour(hour):
+        return 1 if hour in rush_hours else 0
+    
+    X['hour'] = X['arrival_time'].dt.hour
+    X['rush_hour'] = X['hour'].apply(is_rush_hour)
+    return X
+
+
+
+def get_rush_h(X: pd.DataFrame):
+    
+    X['arrival_time'] = pd.to_datetime(X['arrival_time'], format=datetime_format)
+    X['hour'] = X['arrival_time'].dt.hour
+    hourly_passenger_counts = X.groupby('hour')["passengers_up"].sum()
+
+    rush_hours = hourly_passenger_counts.nlargest(3).index.tolist()
+    return rush_hours
+
+
+
+def mult_cul(X: pd.DataFrame, col_1, col_2):
+    col_name = "{}_vs_{}".format(col_1, col_2)
+    X[col_name] = X[col_1] * X [col_2]
+    return X
+
+
+def get_hen_fet_cor(X: pd.DataFrame):
+    for fet_1, fet_2 in FET_HENHECER:
+        X = mult_cul(X, fet_1, fet_2)
+    return X
+
+
 
 
 # TODO PASSENGERS---------------------------------------------------------------:
@@ -145,9 +186,8 @@ def delete_outliers(X: pd.DataFrame):
     for lier in OUTLIERS_KEYS:
         OUTLIERS_FUNC[lier](X)
     return X
-
-
 # ALL---------------------------------------------------------------:::
+
 
 def numeric_cols(X: pd.DataFrame):
     columns = [["passengers_up"]]
@@ -156,44 +196,10 @@ def numeric_cols(X: pd.DataFrame):
     return X
 
 
-OUTLIERS_KEYS = [
-    "clean_half_persons"
-    # ,"clean_time_in_station"
-    , "clean_negative_passengers"
-]
 
 
 
 
-OUTLIERS_FUNC = {
-    "clean_time_in_station": clean_time_in_station
-    , "clean_half_persons": clean_half_persons
-    , "clean_negative_passengers": clean_negative_passengers
-}
-
-PREP_FUNC = {
-    "delete_null": delete_null
-    , "delete_outliers": delete_outliers
-}
-
-
-def preprocess_passengers_data(file_path):
-    data = pd.read_csv(file_path, encoding="ISO-8859-8")
-    data = delete_null(data)
-    data = delete_outliers(data)
-    data = add_square_station_index_column(data)
-    data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
-    data = assign_areas(data, 'latitude', 'longitude')
-    data = convert_cluster_to_numeric(data)
-    data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
-    data = add_area_grade_column(data)
-    return data
-
-
-
-# TODO:
-def read_and_preprocess_data(file_path):
-    pass
 
 
 # ------------------------------------------PART B----------------------------------------#
@@ -265,11 +271,11 @@ def merge_summary_with_data(data, trip_summary):
     return pd.merge(data, trip_summary, on='trip_id_unique')
 
 
-def preprocess_trip_data(file_path):
-    data = read_and_preprocess_data(file_path)
-    trip_summary = create_trip_summary(data)
-    merged_data = merge_summary_with_data(data, trip_summary)
-    return merged_data
+# def preprocess_trip_data(file_path):
+#     data = read_and_preprocess_data(file_path)
+#     trip_summary = create_trip_summary(data)
+#     merged_data = merge_summary_with_data(data, trip_summary)
+#     return merged_data
 
 def convert_cluster_to_numeric(data):
     data['cluster'], _ = pd.factorize(data['cluster'])
@@ -277,61 +283,70 @@ def convert_cluster_to_numeric(data):
 
 
 # -------------------------------------------------------------------------------
+PASSENGER_PRE_PRO_COLUMNS = ["passengers_up"  # LABLES
+                            ,"passengers_continue"]
 
 
-def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
-    """
-    Determine rush hours based on transportation data.
 
-    Parameters:
-    csv_file (str): Path to the CSV file containing transportation data.
-    time_column (str): The name of the column containing timestamp data.
-    plot (bool): Whether to plot the distribution of trips/passengers by hour.
+FET_HENHECER = [
+    ("arrival_time", "passengers_continue")
+    ,("direction", "rush_hour")
+    ,("direction", "arrival_time")
+    ,("rush_hour", "station_id")
+    ,("arrival_time", "station_id")
+]
 
-    Returns:
-    List of int: Rush hours identified by the data.
-    """
-    # Load the CSV file into a DataFrame
-    try:
-        # Load the CSV file into a DataFrame
-        df = pd.read_csv(csv_file, encoding=encoding)
-    except UnicodeDecodeError:
-        # If a UnicodeDecodeError occurs, try a different encoding
-        print(f"Failed to read CSV file with encoding '{encoding}'. Trying 'latin1' instead.")
-        df = pd.read_csv(csv_file, encoding='latin1')
+ADD_FIT_KEY = [
+    "add_rush_h_col"
+    ,"add_last_station_column"
+]
 
-    # Convert the time column to datetime
-    df[time_column] = pd.to_datetime(df[time_column])
+OUTLIERS_KEYS = [
+    "clean_half_persons"
+    # ,"clean_time_in_station"
+    , "clean_negative_passengers"
+]
 
-    # Extract the hour from the time column
-    df['hour'] = df[time_column].dt.hour
+OUTLIERS_FUNC = {
+    "clean_time_in_station": clean_time_in_station
+    , "clean_half_persons": clean_half_persons
+    , "clean_negative_passengers": clean_negative_passengers
+}
 
-    # Group by hour and count the number of trips/passengers
-    hourly_counts = df.groupby('hour').size()
+PREP_FUNC = {
+    "delete_null": delete_null
+    , "delete_outliers": delete_outliers
+    ,"add_rush_h_col": add_rush_h_col #replace with add method for all
+    ,"get_hen_fet_cor" : get_hen_fet_cor
+    ,"add_last_station_column" : add_last_station_column
+    ,"add_area_grade_column" : add_area_grade_column
+    ,"numeric_cols" : numeric_cols
+    
+    ,"add_square_station_index_column":add_square_station_index_column
+    ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
+}
 
-    # Identify the rush hours (e.g., top 3 hours with the highest counts)
-    rush_hours = hourly_counts.nlargest(3).index.tolist()
 
-    if plot:
-        # Plot the distribution of trips/passengers by hour
-        hourly_counts.plot(kind='bar', color='skyblue')
-        plt.xlabel('Hour of the Day')
-        plt.ylabel('Number of Trips/Passengers')
-        plt.title('Distribution of Trips/Passengers by Hour')
-        plt.axhline(y=hourly_counts.mean(), color='r', linestyle='--', label='Average')
-        plt.legend()
-        plt.show()
+# :#############################################################
+def preprocess_data(X: pd.DataFrame):
+    
+    for proc_f in PREP_FUNC.values():
+        X = proc_f(X)
+    
+    return X
 
-    return rush_hours
-
+def preprocess_passengers_data(file_path):
+    data = pd.read_csv(file_path, encoding="ISO-8859-8")
+    data = preprocess_data(data)
+    data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
+    data = assign_areas(data, 'latitude', 'longitude')
+    data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
+    return data
+# :#############################################################
 
 
 
 if __name__ == '__main__':
-    # GET RUSH HOUERS
-    csv_file = 'train_data.csv'  # Replace with your CSV file path
-    time_column = 'arrival_time'  # Replace with your time column name
-    rush_hours = determine_rush_hours(csv_file, time_column)
-    print("Rush hours based on the data:", rush_hours)
+
     
     pass
