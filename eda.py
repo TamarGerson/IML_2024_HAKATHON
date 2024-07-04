@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import os
 from scipy.stats import pearsonr
+import matplotlib.pyplot as plt
 
 
 def save_plotly_fig(fig, folder, file_name):
@@ -42,3 +43,60 @@ def plot_all_correlations(df, target_column, save_folder):
             if fig is not None:
                 file_name = f'correlation_{column}_vs_{target_column}.html'
                 save_plotly_fig(fig, save_folder, file_name)
+                
+                
+def determine_rush_hours(csv_file, time_column, plot=True, encoding='utf-8'):
+    """
+    Determine rush hours based on transportation data.
+
+    Parameters:
+    csv_file (str): Path to the CSV file containing transportation data.
+    time_column (str): The name of the column containing timestamp data.
+    plot (bool): Whether to plot the distribution of trips/passengers by hour.
+    encoding (str): The encoding used to read the CSV file.
+
+    Returns:
+    List of int: Rush hours identified by the data.
+    """
+    try:
+        # Load the CSV file into a DataFrame
+        df = pd.read_csv(csv_file, encoding=encoding)
+    except UnicodeDecodeError:
+        # If a UnicodeDecodeError occurs, try a different encoding
+        print(f"Failed to read CSV file with encoding '{encoding}'. Trying 'latin1' instead.")
+        df = pd.read_csv(csv_file, encoding='latin1')
+
+    # Convert the time column to datetime
+    df[time_column] = pd.to_datetime(df[time_column])
+
+    # Extract the hour from the time column
+    df['hour'] = df[time_column].dt.hour
+
+    # Group by hour and count the number of trips/passengers
+    hourly_counts = df.groupby('hour').size()
+
+    # Identify the rush hours (e.g., top 3 hours with the highest counts)
+    rush_hours = hourly_counts.nlargest(3).index.tolist()
+
+    if plot:
+        # Plot the distribution of trips/passengers by hour
+        hourly_counts.plot(kind='bar', color='skyblue')
+        plt.xlabel('Hour of the Day')
+        plt.ylabel('Number of Trips/Passengers')
+        plt.title('Distribution of Trips/Passengers by Hour')
+        plt.axhline(y=hourly_counts.mean(), color='r', linestyle='--', label='Average')
+        plt.legend()
+        plt.show()
+
+    return rush_hours
+
+
+
+
+if __name__ == '__main__':
+    csv_file = 'train_data.csv'  # Replace with your CSV file path
+    time_column = 'timestamp'  # Replace with your time column name
+    rush_hours = determine_rush_hours(csv_file, time_column)
+    print("Rush hours based on the data:", rush_hours)
+    
+    pass
