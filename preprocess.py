@@ -318,13 +318,14 @@ PREP_FUNC = {
     "delete_null": delete_null
     , "delete_outliers": delete_outliers
     ,"add_rush_h_col": add_rush_h_col #replace with add method for all
-    # ,"get_hen_fet_cor" : get_hen_fet_cor
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
     # ,"numeric_cols" : numeric_cols
     
     ,"add_square_station_index_column":add_square_station_index_column
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
+    
+    ,"get_hen_fet_cor" : get_hen_fet_cor
 }
 
 # :#############################################################

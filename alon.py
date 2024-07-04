@@ -67,3 +67,27 @@ ADD_F_FUNC = {
     "add_rush_h_col": add_rush_h_col
 }
 
+
+
+import pandas as pd
+
+def scale_rush_hours(rush_hours: list, df: pd.DataFrame) -> dict:
+    passenger_counts = dict(zip(df['hour'], df['passengers_up']))
+
+    # Find maximum and minimum passenger counts to normalize grades
+    max_passengers = max(passenger_counts.values())
+    min_passengers = min(passenger_counts.values())
+
+    # Scaling factor
+    scale_factor = 9 / (max_passengers - min_passengers) if max_passengers != min_passengers else 1
+
+    # Initialize dictionary for scaled rush hours
+    scaled_rush_hours = {}
+
+    # Assign grades based on passenger counts
+    for hour in rush_hours:
+        if hour in passenger_counts:
+            passengers = passenger_counts[hour]
+            # Scale passenger count to a grade between 1 and 10
+            grade = 1 + scale_factor * (passengers - min_passengers)
+            scaled_rush_hours[hour] = round(grade)
