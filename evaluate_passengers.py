@@ -7,6 +7,7 @@ import sys
 
 NUM_OF_ARGUMENTS = 2
 TARGET_COLUMN = 'passengers_up'
+TIME_COLUMN = 'arrival_time'
 
 def perform_linear_regression(train_data, test_data, target_column):
     # Separate features and target variable from training data
@@ -39,7 +40,8 @@ if __name__ == "__main__":
         file_path = sys.argv[1]
         train_data = preprocess_passengers_data(file_path)
         target_column = TARGET_COLUMN
-
+        plot_avg_passengers_per_interval_by_area(train_data, target_column)
+        # rush_hours = determine_rush_hours(train_data, TIME_COLUMN)
         plot_all_correlations(train_data, target_column, "first_try")
 
         # Perform linear regression and evaluate the loss
