@@ -4,37 +4,21 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 def split_data_to_csv(file_path, test_size_percentage, seed):
-    # Read the CSV file
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
-
-    # Calculate the test size as a fraction
     test_size = test_size_percentage / 100.0
-
-    # Split the data
     train_data, test_data = train_test_split(data, test_size=test_size, random_state=seed)
-
-    # Save the train and test data to CSV files
     train_data.to_csv('train_data.csv', index=False, encoding="ISO-8859-8")
     test_data.to_csv('test_data.csv', index=False, encoding="ISO-8859-8")
 
     print(f"Data split completed. Training data saved to 'train_data.csv' and test data saved to 'test_data.csv'.")
 
 
-def split_data(file_path, test_size_percentage, train_size_percentage, seed):
-    # Read the CSV file
+def split_data(file_path, test_size_percentage, seed):
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
-
-    # Calculate the test size as a fraction
     test_size = test_size_percentage / 100.0
-
-    # Split the data
-    train_data, test_data = np.sample(data, test_size=test_size, random_state=seed)
-
-    # Save the train and test data to CSV files
-    train_data.to_csv('train_data.csv', index=False, encoding="ISO-8859-8")
-    test_data.to_csv('test_data.csv', index=False, encoding="ISO-8859-8")
-
-    print(f"Data split completed. Training data saved to 'train_data.csv' and test data saved to 'test_data.csv'.")
+    train_data, test_data = train_test_split(data, test_size=test_size, random_state=seed)
+    cur_test, test_data = train_test_split(data, test_size=test_size, random_state=seed)
+    return train_data, cur_test
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ datetime_format = "%H:%M:%S"
 def add_rush_h_col(X: pd.DataFrame) -> pd.DataFrame:
     
     rush_hours = get_rush_h(X)
-    
+    print(rush_hours)
     def is_rush_hour(hour):
         return 1 if hour in rush_hours else 0
     
@@ -58,7 +58,7 @@ def get_rush_h(X: pd.DataFrame):
     X['hour'] = X['arrival_time'].dt.hour
     hourly_passenger_counts = X.groupby('hour')["passengers_up"].sum()
 
-    rush_hours = hourly_passenger_counts.nlargest(3).index.tolist()
+    rush_hours = hourly_passenger_counts.nlargest(6).index.tolist()
     return rush_hours
 
 
@@ -66,12 +66,6 @@ def get_rush_h(X: pd.DataFrame):
 def mult_cul(X: pd.DataFrame, col_1, col_2):
     col_name = "{}_vs_{}".format(col_1, col_2)
     X[col_name] = X[col_1] * X [col_2]
-    return X
-
-
-def get_hen_fet_cor(X: pd.DataFrame):
-    for fet_1, fet_2 in FET_HENHECER:
-        X = mult_cul(X, fet_1, fet_2)
     return X
 
 
@@ -142,18 +136,20 @@ def add_last_station_column(data):
     data['last_station'] = data['last_station'].astype(int)  # Convert boolean to binary (0/1)
     return data
 
+
 def add_square_station_index_column(data):
     # Create a column for the square of station_index
     data['station_index_squared'] = data['station_index'] ** 2
     return data
+
 
 def add_30_minute_interval(df, time_column, interval_column_name):
     # Convert column to datetime
     df[time_column] = pd.to_datetime(df[time_column], errors='coerce')
     # Create a new column with 10-minute intervals
     df[interval_column_name] = df[time_column].dt.floor('30T')
-
     return df
+
 
 def assign_areas(df, lat_column, lon_column):
     # Define your own logic for areas, here we use a simple grid approach
@@ -313,19 +309,23 @@ OUTLIERS_FUNC = {
     , "clean_negative_passengers": clean_negative_passengers
 }
 
+def get_hen_fet_cor(X: pd.DataFrame):
+    for fet_1, fet_2 in FET_HENHECER:
+        X = mult_cul(X, fet_1, fet_2)
+    return X
+
 PREP_FUNC = {
     "delete_null": delete_null
     , "delete_outliers": delete_outliers
     ,"add_rush_h_col": add_rush_h_col #replace with add method for all
-    ,"get_hen_fet_cor" : get_hen_fet_cor
+    # ,"get_hen_fet_cor" : get_hen_fet_cor
     ,"add_last_station_column" : add_last_station_column
     ,"add_area_grade_column" : add_area_grade_column
-    ,"numeric_cols" : numeric_cols
+    # ,"numeric_cols" : numeric_cols
     
     ,"add_square_station_index_column":add_square_station_index_column
     ,"convert_cluster_to_numeric" : convert_cluster_to_numeric
 }
-
 
 # :#############################################################
 def preprocess_data(X: pd.DataFrame):
@@ -338,7 +338,7 @@ def preprocess_data(X: pd.DataFrame):
 def preprocess_passengers_data(file_path):
     data = pd.read_csv(file_path, encoding="ISO-8859-8")
     data = preprocess_data(data)
-    data = add_30_minute_interval(data, 'arrival_time', '10_min_interval')
+    data = add_30_minute_interval(data, 'arrival_time', '30_min_interval')
     data = assign_areas(data, 'latitude', 'longitude')
     data = calculate_time_diff(data, 'arrival_time', 'door_closing_time')
     return data

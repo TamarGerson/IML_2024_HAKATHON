@@ -27,17 +27,17 @@ def plot_correlation(df, column1, column2):
 
 def plot_avg_passengers_per_interval_by_area(df, passengers_column):
     # Create 10-minute intervals
-    df['10_min_interval'] = df['arrival_time'].dt.floor('10T')
+    df['10_min_interval'] = df['arrival_time'].dt.floor('30T')
 
     # Calculate the average passengers up per 10-minute interval for each cluster
-    avg_passengers = df.groupby(['cluster', '10_min_interval'])[passengers_column].mean().reset_index()
+    avg_passengers = df.groupby(['cluster', '30_min_interval'])[passengers_column].mean().reset_index()
 
     # Plot for each cluster
     clusters = avg_passengers['cluster'].unique()
     for cluster in clusters:
         cluster_data = avg_passengers[avg_passengers['cluster'] == cluster]
         plt.figure(figsize=(10, 6))
-        plt.bar(cluster_data['10_min_interval'].astype(str), cluster_data[passengers_column])
+        plt.bar(cluster_data['30_min_interval'].astype(str), cluster_data[passengers_column])
         plt.xlabel('Time Interval')
         plt.ylabel('Average Passengers Up')
         plt.title(f'Average Passengers Up per 10-Minute Interval - Cluster {cluster}')
@@ -51,6 +51,7 @@ def plot_avg_passengers_per_interval_by_area(df, passengers_column):
 def plot_all_correlations(df, target_column, save_folder):
     for column in df.columns:
         if column != target_column and pd.api.types.is_numeric_dtype(df[column]):
+            print("plotting correlation")
             fig = plot_correlation(df, column, target_column)
             if fig is not None:
                 file_name = f'correlation_{column}_vs_{target_column}.html'

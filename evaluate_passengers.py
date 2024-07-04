@@ -3,11 +3,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from preprocess import *
 from eda import *
+from split_data import *
 import sys
 
 NUM_OF_ARGUMENTS = 2
 TARGET_COLUMN = 'passengers_up'
 TIME_COLUMN = 'arrival_time'
+
 
 def perform_linear_regression(train_data, test_data, target_column):
     # Separate features and target variable from training data
@@ -33,8 +35,11 @@ def perform_linear_regression(train_data, test_data, target_column):
     print(f"Mean Squared Error on the test data: {mse}")
 
 
-def evaluate_preprocess(file_path):
-    pass
+def evaluate_preprocess(file_path, test_size_percentage, seed):
+    train_data, test_data = split_data(file_path, test_size_percentage, seed)
+    # basic preprocess for train and test
+    # advanced preprocess
+    # linear regression for both
 
 if __name__ == "__main__":
     if len(sys.argv) != NUM_OF_ARGUMENTS:
